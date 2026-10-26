@@ -21,6 +21,7 @@ export async function loadChart(country) {
  const key = `orbitone-chart-${country.code}`;
  const attempts = [
   () => getJSON(`./api/chart?country=${country.code}`,8000).then(d=>appleChart(d,country)),
+  () => getJSON(`./charts/${country.code}.json`,8000).then(d=>appleChart(d,country)),
   () => getJSON(`https://itunes.apple.com/${country.code}/rss/topsongs/limit=25/json`,8000).then(d=>itunesChart(d,country))
  ];
  for (const attempt of attempts) { try { const chart = await attempt(); writeStore(key,chart); return chart; } catch { /* Explicit cache/demo fallback below. */ } }

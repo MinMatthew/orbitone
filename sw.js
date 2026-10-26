@@ -1,4 +1,4 @@
-const CACHE='orbitone-shell-v38';
+const CACHE='orbitone-shell-v39';
 const FILES=['./','./index.html','./styles.css','./theme.css?v=2','./components.css','./layout.css?v=33','./app.js?v=24','./player.js?v=20','./playback.js?v=21','./preview.js?v=20','./cache.js?v=20','./youtube.js?v=20','./lib.js','./data.js','./globe.js?v=22','./playlist.js','./pwa.js','./manifest.webmanifest','./assets/icon-192.png?v=13','./assets/icon-512.png?v=13','./assets/countries-110m.json','./vendor/d3.min.js','./vendor/topojson.min.js'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(file=>new Request(file,{cache:'reload'})))).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('orbitone-shell-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
