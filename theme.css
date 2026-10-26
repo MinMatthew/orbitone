@@ -1,0 +1,250 @@
+:root {
+  color-scheme: light;
+  --bg: #fff7ea;
+  --line: rgba(52, 39, 58, .14);
+  --muted: #766c78;
+  --accent: #9f4fb9;
+  --gradient: linear-gradient(115deg, #ef858d 0%, #c178d5 48%, #66b9e8 100%);
+  color: #29232d;
+  background: var(--bg);
+}
+
+body {
+  color: #29232d;
+  background: linear-gradient(145deg, #fff2c8 0%, #fff8ed 46%, #ffe7e7 100%);
+  background-attachment: fixed;
+}
+
+.app-shell {
+  border-inline-color: rgba(255, 255, 255, .72);
+}
+
+.brand-dot,
+footer span {
+  color: var(--accent);
+}
+
+.icon-button {
+  color: #62566b;
+}
+
+.header .icon-button,
+.country-navigation > .icon-button {
+  color: #574b60;
+  background: rgba(255, 255, 255, .64);
+  border-color: var(--line);
+  box-shadow: 0 4px 14px rgba(104, 72, 105, .07);
+}
+
+.eyebrow {
+  color: #99549f;
+}
+
+.live-dot {
+  background: #ed7184;
+  box-shadow: 0 0 9px rgba(237, 113, 132, .35);
+}
+
+h1,
+h2,
+h3,
+.section-heading,
+.track-info,
+.row-meta strong {
+  color: #29232d;
+}
+
+.intro,
+.gesture-hint,
+.globe-coordinate,
+.playback-status,
+.provider-label,
+.row-meta small,
+footer p {
+  color: var(--muted);
+}
+
+.globe-stage {
+  background: radial-gradient(ellipse at 50% 48%, rgba(255, 255, 255, .8), rgba(255, 255, 255, .12) 55%, transparent 76%);
+}
+
+.country-picker {
+  color: #29232d;
+  background: rgba(255, 255, 255, .68);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 5px 16px rgba(104, 72, 105, .06);
+}
+
+.country-code {
+  color: #fff;
+  background: var(--gradient);
+  border-radius: 10px;
+}
+
+.tab-bar {
+  background: rgba(255, 255, 255, .68);
+  border-color: var(--line);
+  box-shadow: 0 8px 24px rgba(123, 82, 121, .08);
+}
+
+.tab-bar [role="tab"] {
+  color: #6b6070;
+}
+
+.tab-bar [role="tab"][aria-selected="true"] {
+  color: #fff;
+  background: var(--gradient);
+  box-shadow: 0 5px 14px rgba(171, 104, 183, .2);
+}
+
+.data-status,
+.subtle,
+.empty-state {
+  color: var(--muted);
+}
+
+.track-info {
+  background: rgba(255, 255, 255, .72);
+}
+
+.rank-badge {
+  color: #493b4e;
+  background: rgba(255, 253, 248, .94);
+}
+
+.track-tags span {
+  color: #80508e;
+  background: #f5e8f5;
+  border-color: rgba(128, 80, 142, .16);
+}
+
+.transport .icon-button {
+  color: #5d5065;
+  background: rgba(255, 255, 255, .74);
+  border: 1px solid var(--line);
+}
+
+.play-button,
+.primary-button {
+  color: #fff;
+  background: var(--gradient);
+  box-shadow: 0 7px 18px rgba(165, 100, 174, .2);
+}
+
+.video-section {
+  border-color: var(--line);
+}
+
+.media-host,
+.video-placeholder {
+  color: #64576a;
+  background: linear-gradient(135deg, #fff7ec, #edf7ff 58%, #fff0f3);
+  border-color: var(--line);
+}
+
+.provider-links a,
+.text-button,
+.connect-link {
+  color: #8e4da3;
+}
+
+.chart-row,
+.playlist-item {
+  border-color: var(--line);
+}
+
+.chart-row > span:first-child,
+.chart-row svg {
+  color: #9a64a9;
+}
+
+.playlist-controls .pill-button,
+.pill-button {
+  color: #66516d;
+  background: rgba(255, 255, 255, .8);
+  border-color: var(--line);
+  box-shadow: 0 4px 12px rgba(104, 72, 105, .05);
+}
+
+.playlist-row {
+  color: #29232d;
+  background: rgba(255, 255, 255, .72);
+}
+
+.playlist-row .more {
+  color: #826b88;
+}
+
+.swipe-actions button {
+  color: #fff;
+  background: #b36bc2;
+}
+
+.swipe-actions button:last-child {
+  color: #fff;
+  background: #e66d82;
+}
+
+.empty-state h3 {
+  color: #403349;
+}
+
+.empty-state svg {
+  color: #a764bb;
+}
+
+dialog {
+  color: #29232d;
+  background: linear-gradient(150deg, #fffdf7, #fff0f2);
+  border-color: rgba(52, 39, 58, .16);
+  box-shadow: 0 24px 70px rgba(57, 38, 57, .2);
+}
+
+dialog::backdrop {
+  background: rgba(43, 34, 48, .34);
+  backdrop-filter: blur(6px);
+}
+
+dialog input,
+dialog textarea {
+  color: #29232d;
+  background: rgba(255, 255, 255, .88);
+  border-color: var(--line);
+}
+
+dialog input::placeholder {
+  color: #968b98;
+}
+
+#country-options button {
+  color: #29232d;
+  border-color: var(--line);
+}
+
+#country-options button small {
+  color: var(--muted);
+}
+
+.toast {
+  color: #fff;
+  background: #3d3044;
+  border: 1px solid rgba(255, 255, 255, .2);
+}
+
+button:hover {
+  filter: brightness(1.04);
+}
+
+::selection {
+  color: #29232d;
+  background: rgba(235, 145, 185, .32);
+}
+
+@media (min-width: 700px) {
+  .app-shell {
+    background: rgba(255, 253, 248, .66);
+    border-color: rgba(52, 39, 58, .12);
+    box-shadow: 0 40px 110px rgba(105, 73, 112, .16);
+  }
+}
