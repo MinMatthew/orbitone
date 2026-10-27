@@ -44,7 +44,7 @@ export function parseMediaURL(value) {
 
 const PLACEHOLDER = '<div class="video-placeholder"><p>음악과 함께, 그 장면 속으로</p><small>전체 듣기를 누르면 YouTube 플레이어가 표시됩니다</small></div>';
 
-// Video embeds only. `emit(type, detail)` reports: playing, paused, buffering, blocked, ended, retry, exhausted, failed.
+// Video embeds only. `emit(type, detail)` reports: playing, paused, buffering, blocked, muted, ended, retry, exhausted, failed.
 export class Player {
   constructor(emit) {
     this.emit = emit;
@@ -72,6 +72,8 @@ export class Player {
     $('media-host').innerHTML = PLACEHOLDER;
   }
 
+  warmup() { youtubeSDK().catch(() => {}); }
+
   pause() { this.yt?.pauseVideo?.(); this.sp?.pause?.(); }
   resume() { this.yt?.playVideo?.(); this.sp?.resume?.(); }
 
@@ -88,6 +90,20 @@ export class Player {
       const mount = document.createElement('div');
       $('media-host').replaceChildren(mount);
       let index = 0;
+      let triedMuted = false;
+      let triedUnmute = false;
+      // Chrome/Safari allow muted autoplay without a gesture; sound is restored once playback has started.
+      const restoreSound = () => {
+        triedUnmute = true;
+        this.yt.unMute();
+        setTimeout(() => {
+          if (token !== this.token) return;
+          if (this.yt.getPlayerState() === YT.PlayerState.PLAYING) return;
+          this.yt.mute();
+          this.yt.playVideo();
+          this.emit('muted');
+        }, 1200);
+      };
       // 2 invalid id, 5 HTML5 error, 100 removed/private, 101/150 embedding disallowed: try the next candidate.
       const next = code => {
         index += 1;
@@ -100,19 +116,23 @@ export class Player {
         width: '100%',
         height: '100%',
         videoId: ids[0],
-        playerVars: { playsinline: 1, origin: location.origin, rel: 0 },
+        playerVars: { autoplay: 1, playsinline: 1, origin: location.origin, rel: 0 },
         events: {
           onReady: event => { if (token === this.token) event.target.playVideo(); },
           onStateChange: event => {
             if (token !== this.token) return;
             const state = YT.PlayerState;
-            if (event.data === state.PLAYING) this.emit('playing');
+            if (event.data === state.PLAYING) { this.emit('playing'); if (triedMuted && !triedUnmute) restoreSound(); }
             else if (event.data === state.PAUSED) this.emit('paused');
             else if (event.data === state.BUFFERING) this.emit('buffering');
             else if (event.data === state.ENDED) this.emit('ended');
           },
           onError: event => { if (token === this.token) next(event.data); },
-          onAutoplayBlocked: () => { if (token === this.token) this.emit('blocked'); },
+          onAutoplayBlocked: () => {
+            if (token !== this.token) return;
+            if (!triedMuted) { triedMuted = true; this.yt.mute(); this.yt.playVideo(); return; }
+            this.emit('blocked');
+          },
         },
       });
     } catch (error) {

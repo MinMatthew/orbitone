@@ -1,5 +1,5 @@
 import { safeImage } from './lib.js';
-import { Player } from './player.js?v=20';
+import { Player } from './player.js?v=22';
 import { Preview, findPreview } from './preview.js?v=20';
 import { cacheGet, cacheSet, lookupKey } from './cache.js?v=20';
 import { getKey, searchVideoIds, KeyError, QuotaError } from './youtube.js?v=20';
@@ -197,6 +197,7 @@ export class Playback {
       case 'paused': this.set('paused', '일시정지'); break;
       case 'buffering': this.set('loading', '불러오는 중…'); break;
       case 'blocked': this.set('paused', '영상 안의 재생 버튼을 눌러주세요.'); break;
+      case 'muted': this.hooks.toast('소리가 꺼진 채 재생 중입니다. 영상의 음소거를 해제해 주세요.'); this.set('playing', 'YouTube · 음소거 재생 중'); break;
       case 'retry':
         this.hooks.toast('이 영상은 재생할 수 없어 다른 후보를 시도합니다.');
         this.set('loading', '다른 영상을 불러오는 중…');

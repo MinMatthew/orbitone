@@ -176,6 +176,60 @@ footer p {
   color: #826b88;
 }
 
+#panel-playlist {
+  color: #f4f0ff;
+  background: linear-gradient(145deg, #3a2a45 0%, #2a2034 52%, #1e1729 100%);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 10px;
+  box-shadow: 0 14px 30px rgba(52, 33, 62, .32), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+
+#panel-playlist .icon-button {
+  color: #f3e8f7;
+  background: rgba(255, 255, 255, .09);
+  border: 1px solid rgba(255, 255, 255, .18);
+}
+
+#panel-playlist .playlist-heading .eyebrow,
+#panel-playlist .playlist-row .more {
+  color: #c0a6ec;
+}
+
+#panel-playlist .playlist-heading h2,
+#panel-playlist #playlist-empty h3 {
+  color: #f4f0ff;
+}
+
+#panel-playlist .subtle,
+#panel-playlist #playlist-empty,
+#panel-playlist #playlist-empty p {
+  color: #b6adbd !important;
+}
+
+#panel-playlist .playlist-item {
+  border-color: rgba(255, 255, 255, .1);
+}
+
+#panel-playlist .playlist-row {
+  color: #f4f0ff;
+  background: #30243a;
+}
+
+#panel-playlist .playlist-row .row-meta strong {
+  color: #f4f0ff;
+}
+
+#panel-playlist .playlist-row .row-meta small {
+  color: #c8bfd1;
+}
+
+#panel-playlist .pill-button {
+  color: #e8ddf5;
+  background: rgba(255, 255, 255, .09);
+  border-color: rgba(255, 255, 255, .16);
+  box-shadow: none;
+}
+
 .swipe-actions button {
   color: #fff;
   background: #b36bc2;
