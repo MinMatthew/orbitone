@@ -96,19 +96,26 @@ h1 {
 .splash-tagline,
 .splash-wordmark {
   margin: 0;
-  color: #34263f;
   opacity: 0;
   animation: splash-in .4s cubic-bezier(.2, .8, .2, 1) both;
 }
 
 .splash-tagline {
-  font-size: 16px;
+  font-size: 21px;
+  line-height: 1.2;
   font-weight: 600;
+  letter-spacing: -1.2px;
   animation-delay: .42s;
 }
 
+.splash-tagline span {
+  background: var(--gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
 .splash-wordmark {
-  font: 700 28px 'Space Grotesk', sans-serif;
   animation-delay: .84s;
 }
 
