@@ -5,7 +5,7 @@ import { parseMediaURL } from './player.js?v=22';
 import { Playback } from './playback.js?v=23';
 import { getKey, setKey, searchCandidates } from './youtube.js?v=20';
 import { Playlist, trackLink } from './playlist.js';
-import { setupPWA } from './pwa.js';
+import { setupPWA } from './pwa.js?v=2';
 
 document.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon);});
 let country=countries[0],tracks=[],current=null,chartToken=0,globe=null,chart=null,mediaTarget=null;
@@ -52,4 +52,4 @@ intro.addEventListener('click',closeIntro);
 document.addEventListener('keydown',event=>{if(event.key==='Escape')closeIntro();});
 function showIntro(){if(introSeen())return;intro.hidden=false;intro.focus({preventScroll:true});}
 function hideSplash(){const splash=$('splash');if(!splash)return;let finished=false;const done=()=>{if(finished)return;finished=true;splash.remove();showIntro();};splash.classList.add('hide');if(matchMedia('(prefers-reduced-motion: reduce)').matches)done();else{splash.addEventListener('transitionend',done,{once:true});setTimeout(done,700);}}
-setTimeout(hideSplash,Math.max(0,1100-performance.now()));
+setTimeout(hideSplash,Math.max(0,1450-performance.now()));

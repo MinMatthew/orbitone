@@ -80,10 +80,36 @@ h1 {
   transition: opacity .45s ease, visibility 0s linear .45s;
 }
 
+.splash-lockup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
 .splash img {
   width: min(32vw, 120px);
   height: auto;
-  animation: splash-in .6s cubic-bezier(.2, .8, .2, 1) both;
+  animation: splash-in .4s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.splash-tagline,
+.splash-wordmark {
+  margin: 0;
+  color: #34263f;
+  opacity: 0;
+  animation: splash-in .4s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.splash-tagline {
+  font-size: 16px;
+  font-weight: 600;
+  animation-delay: .42s;
+}
+
+.splash-wordmark {
+  font: 700 28px 'Space Grotesk', sans-serif;
+  animation-delay: .84s;
 }
 
 .splash.hide {
@@ -93,8 +119,8 @@ h1 {
 }
 
 @keyframes splash-in {
-  from { opacity: 0; transform: scale(.82); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .globe-intro {
@@ -117,7 +143,7 @@ h1 {
   position: absolute;
   inset: 0;
   margin: auto;
-  height: min(150px, 80%);
+  height: min(225px, 100%);
   width: auto;
   aspect-ratio: 1;
   overflow: visible;
@@ -170,9 +196,12 @@ h1 {
 
 @media (prefers-reduced-motion: reduce) {
   .splash,
-  .splash img {
+  .splash img,
+  .splash-tagline,
+  .splash-wordmark {
     animation: none;
     transition: none;
+    opacity: 1;
   }
 
   .demo-finger {
@@ -215,10 +244,10 @@ h1 {
 }
 
 .music-panel {
-  flex: 0 0 calc(clamp(228px, 34dvh, 300px) + env(safe-area-inset-bottom));
+  flex: 0 0 calc(clamp(244px, 36dvh, 320px) + env(safe-area-inset-bottom));
   min-height: 0;
   margin: 3px 20px 0;
-  padding: 0 0 env(safe-area-inset-bottom);
+  padding: 0 0 max(16px, env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -823,7 +852,8 @@ h1 {
 
 @media (min-width: 700px) {
   .app-shell {
-    height: min(calc(100dvh - 48px), 920px);
+    height: calc(100dvh - 48px);
+    max-width: 720px;
     margin: 24px auto;
     border-radius: 24px;
   }
