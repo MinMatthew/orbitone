@@ -1,7 +1,7 @@
 import { $, getJSON } from './lib.js';
-import { countries, hasChart } from './data.js';
+import { countries, hasChart } from './data.js?v=3';
 
-export async function createGlobe(onSelect) {
+export async function createGlobe(onSelect, initial = countries[0]) {
  const canvas = $('globe'), ctx = canvas.getContext('2d');
  if (!window.d3 || !window.topojson || !ctx) throw new Error('Globe dependencies unavailable');
  const d3 = window.d3;
@@ -12,9 +12,9 @@ export async function createGlobe(onSelect) {
  const byId = new Map(countries.map(c=>[c.id,c]));
  const drawn = new Set(features.map(featureId));
  const markers = countries.filter(c=>!drawn.has(c.id));
- const projection = d3.geoOrthographic().rotate([-127.8,-36.2]).clipAngle(90).precision(.5);
+ const projection = d3.geoOrthographic().rotate([-initial.center[0],-initial.center[1]]).clipAngle(90).precision(.5);
  const path = d3.geoPath(projection,ctx), grid=d3.geoGraticule10();
- let width=0,height=0,radius=0,centerY=0,selected=countries[0],drag=null,animation=0,zoom=1,pinchDistance=0,pinching=false,zoomAnimation=0,lastTap=null,zoomFallback=0;
+ let width=0,height=0,radius=0,centerY=0,selected=initial,drag=null,animation=0,zoom=1,pinchDistance=0,pinching=false,zoomAnimation=0,lastTap=null,zoomFallback=0;
  const touchPoints=new Map();
  const minZoom=.65,maxZoom=2.2;
  const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;

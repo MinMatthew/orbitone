@@ -1,13 +1,13 @@
 {
   "id": "./",
-  "name": "Orbitone — 세계의 음악",
+  "name": "Orbitone — Music has no borders",
   "short_name": "Orbitone",
-  "description": "지구를 돌려 발견하는 나라별 인기 음악",
-  "lang": "ko",
+  "description": "Spin the globe to discover each country's top music",
+  "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "background_color": "#090910",
   "theme_color": "#090910",
   "icons": [

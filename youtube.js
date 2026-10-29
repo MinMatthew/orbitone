@@ -59,7 +59,7 @@ export function rankVideos(items, track) {
 export function apiError(status, body) {
   const reason = body?.error?.errors?.[0]?.reason || body?.error?.status || '';
   if (QUOTA_REASONS.includes(reason)) return new QuotaError(reason);
-  if (status === 400 || status === 403) return new KeyError(body?.error?.message || reason || 'API 키를 확인해 주세요.');
+  if (status === 400 || status === 403) return new KeyError(body?.error?.message || reason || 'Please check your API key.');
   return new Error(`YouTube ${status}`);
 }
 

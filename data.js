@@ -23,6 +23,17 @@ export async function loadChartIndex() {
  catch { Object.assign(chartStatus,readStore('orbitone-chart-index',{})); }
 }
 export const hasChart = country => !!country.code && chartStatus[country.code] !== 'unavailable';
+// Browsers expose the device region only through the locale tag (e.g. ko-KR); fall back to the first country.
+export function systemCountry() {
+ for (const tag of navigator.languages?.length ? navigator.languages : [navigator.language]) {
+  try {
+   const locale = new Intl.Locale(tag), region = (locale.region || locale.maximize().region || '').toLowerCase();
+   const found = countries.find(c => c.code === region);
+   if (found) return found;
+  } catch { /* ignore malformed tags */ }
+ }
+ return countries[0];
+}
 export const demos = [
  {id:'demo-apt',title:'APT.',artist:'ROSÉ & Bruno Mars',genre:'Pop',youtube:'ekr2nIex040'},
  {id:'demo-dynamite',title:'Dynamite',artist:'BTS',genre:'K-Pop',youtube:'gdZLi9oWNZg'},
@@ -30,11 +41,11 @@ export const demos = [
 ];
 function appleChart(data, country) {
  if (!Array.isArray(data.feed?.results) || !data.feed.results.length) throw new Error('Empty chart');
- return {source:data.source==='itunes'?'iTunes 판매 차트 (대체 출처)':'Apple Music 인기 차트',updated:data.feed.updated,tracks:data.feed.results.map((x,i) => ({id:x.id,title:x.name,artist:x.artistName,genre:x.genres?.find(g=>g.genreId!=='34')?.name||'장르 미제공',artwork:x.artworkUrl100?.replace('100x100','600x600'),url:x.url,rank:i+1,country:country.code,countryName:country.name}))};
+ return {source:data.source==='itunes'?'iTunes Top Songs (fallback source)':'Apple Music Top Charts',updated:data.feed.updated,tracks:data.feed.results.map((x,i) => ({id:x.id,title:x.name,artist:x.artistName,genre:x.genres?.find(g=>g.genreId!=='34')?.name||'Genre unavailable',artwork:x.artworkUrl100?.replace('100x100','600x600'),url:x.url,rank:i+1,country:country.code,countryName:country.en}))};
 }
 function itunesChart(data,country) {
  if (!Array.isArray(data.feed?.entry) || !data.feed.entry.length) throw new Error('Empty chart');
- return {source:'iTunes 판매 차트 (대체 출처)',updated:data.feed.updated?.label,tracks:data.feed.entry.map((x,i)=>({id:x.id.attributes['im:id'],title:x['im:name'].label,artist:x['im:artist'].label,genre:x.category?.attributes?.label||'장르 미제공',artwork:x['im:image']?.at(-1)?.label,url:x.id.label,rank:i+1,country:country.code,countryName:country.name}))};
+ return {source:'iTunes Top Songs (fallback source)',updated:data.feed.updated?.label,tracks:data.feed.entry.map((x,i)=>({id:x.id.attributes['im:id'],title:x['im:name'].label,artist:x['im:artist'].label,genre:x.category?.attributes?.label||'Genre unavailable',artwork:x['im:image']?.at(-1)?.label,url:x.id.label,rank:i+1,country:country.code,countryName:country.en}))};
 }
 export async function loadChart(country) {
  const key = `orbitone-chart-${country.code}`;
@@ -45,6 +56,6 @@ export async function loadChart(country) {
  ];
  for (const attempt of attempts) { try { const chart = await attempt(); writeStore(key,chart); return chart; } catch { /* Explicit cache/demo fallback below. */ } }
  const cache = readStore(key,null);
- if (cache?.tracks?.length) return {...cache,stale:true};
- return {source:'예시 음악 · 현재 국가의 실제 순위가 아닙니다',demo:true,tracks:demos.map(t=>({...t,country:country.code,countryName:country.name}))};
+ if (cache?.tracks?.length) return {...cache,source:/iTunes/.test(cache.source)?'iTunes Top Songs (fallback source)':'Apple Music Top Charts',tracks:cache.tracks.map(t=>({...t,genre:/[가-힣]/.test(t.genre||'')?'Genre unavailable':t.genre,countryName:country.en})),stale:true};
+ return {source:"Sample music · not this country's actual chart",demo:true,tracks:demos.map(t=>({...t,country:country.code,countryName:country.en}))};
 }
