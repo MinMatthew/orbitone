@@ -1,7 +1,3 @@
-:root {
-  font-size: 150%;
-}
-
 html,
 body {
   height: 100%;
@@ -46,19 +42,19 @@ main {
 }
 
 .explore .eyebrow {
-  font-size: 12px;
-  line-height: 18px;
+  font-size: 8px;
+  line-height: 12px;
 }
 
 h1 {
-  font-size: 31.5px;
+  font-size: 21px;
   line-height: 1.2;
   margin: 4px 0 2px;
 }
 
 .intro {
-  font-size: 15px;
-  line-height: 21px;
+  font-size: 10px;
+  line-height: 14px;
 }
 
 .globe-stage {
@@ -105,7 +101,7 @@ h1 {
 }
 
 .splash-tagline {
-  font-size: 31.5px;
+  font-size: 21px;
   line-height: 1.2;
   font-weight: 600;
   letter-spacing: -1.2px;
@@ -221,8 +217,8 @@ h1 {
 }
 
 .country-navigation {
-  height: 60px;
-  flex: 0 0 60px;
+  height: 44px;
+  flex: 0 0 44px;
   margin-top: 0;
   gap: 8px;
 }
@@ -233,8 +229,8 @@ h1 {
 }
 
 .country-picker {
-  height: 56px;
-  min-height: 56px;
+  height: 42px;
+  min-height: 42px;
   padding: 4px 10px;
   gap: 9px;
 }
@@ -249,13 +245,13 @@ h1 {
 }
 
 .gesture-hint {
-  font-size: 12px;
-  line-height: 16.5px;
+  font-size: 8px;
+  line-height: 11px;
   margin: 0;
 }
 
 .music-panel {
-  flex: 0 0 calc(clamp(320px, 52dvh, 480px) + env(safe-area-inset-bottom));
+  flex: 0 0 calc(clamp(244px, 36dvh, 320px) + env(safe-area-inset-bottom));
   min-height: 0;
   margin: 3px 20px 0;
   padding: 0 0 max(16px, env(safe-area-inset-bottom));
@@ -290,9 +286,9 @@ h1 {
 }
 
 .music-panel > .section-heading {
-  height: 32px;
-  min-height: 32px;
-  flex: 0 0 32px;
+  height: 20px;
+  min-height: 20px;
+  flex: 0 0 20px;
   margin: 0;
 }
 
@@ -335,14 +331,14 @@ h1 {
 }
 
 #chart-status {
-  height: 21px;
-  min-height: 21px;
-  flex: 0 0 21px;
+  height: 14px;
+  min-height: 14px;
+  flex: 0 0 14px;
   margin: 0 0 6px;
   padding: 0;
   overflow: hidden;
-  font-size: 13.5px;
-  line-height: 21px;
+  font-size: 9px;
+  line-height: 14px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -394,8 +390,7 @@ h1 {
   top: 3px;
   left: 3px;
   padding: 3px 5px;
-  font-size: 10.5px;
-  white-space: nowrap;
+  font-size: 7px;
 }
 
 .track-info {
@@ -411,13 +406,13 @@ h1 {
 
 .track-heading h2 {
   margin: 0;
-  font-size: 21px;
+  font-size: 14px;
   line-height: 1.2;
 }
 
 .track-heading p {
   margin: 3px 0 0;
-  font-size: 15px;
+  font-size: 10px;
 }
 
 .add-button {
@@ -452,7 +447,7 @@ h1 {
 
 .track-tags span {
   padding: 4px 6px;
-  font-size: 12px;
+  font-size: 8px;
   line-height: 1;
 }
 
@@ -462,11 +457,11 @@ h1 {
 }
 
 .playback-status {
-  min-height: 21px;
-  flex: 0 0 21px;
+  min-height: 14px;
+  flex: 0 0 14px;
   margin: 0;
-  font-size: 13.5px;
-  line-height: 21px;
+  font-size: 9px;
+  line-height: 14px;
 }
 
 .music-panel:has(#media-host iframe) {
@@ -506,9 +501,9 @@ h1 {
   display: flex;
   align-items: center;
   gap: 6px;
-  height: 18px;
-  flex: 0 0 18px;
-  font-size: 12px;
+  height: 14px;
+  flex: 0 0 14px;
+  font-size: 8px;
 }
 
 .mode-badge {
@@ -517,7 +512,7 @@ h1 {
   border-radius: 999px;
   color: #fff;
   background: var(--gradient);
-  font-size: 12px;
+  font-size: 8px;
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
@@ -540,7 +535,7 @@ h1 {
 
 .progress-time {
   flex: 0 0 auto;
-  min-width: 39px;
+  min-width: 26px;
   color: var(--muted);
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -616,7 +611,7 @@ h1 {
 
 .full-note {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 8px;
   line-height: 1.3;
   text-align: center;
 }
@@ -636,7 +631,7 @@ h1 {
 .key-guide ol {
   margin: 6px 0;
   padding-left: 18px;
-  font-size: 18px;
+  font-size: 12px;
   line-height: 1.65;
 }
 
@@ -647,14 +642,14 @@ h1 {
 }
 
 .key-guide code {
-  font-size: 16.5px;
+  font-size: 11px;
   overflow-wrap: anywhere;
 }
 
 .key-problem {
   margin: 6px 0;
   color: #c0344d;
-  font-size: 18px;
+  font-size: 12px;
 }
 
 .key-actions {
@@ -680,11 +675,11 @@ h1 {
 
 .video-placeholder p {
   margin: 0;
-  font-size: 13.5px;
+  font-size: 9px;
 }
 
 .video-placeholder small {
-  font-size: 12px;
+  font-size: 8px;
   line-height: 1.2;
 }
 
@@ -694,7 +689,7 @@ h1 {
   flex: 0 0 16px;
   margin: 0;
   padding: 0;
-  font-size: 12px;
+  font-size: 8px;
 }
 
 #panel-playlist {
@@ -767,7 +762,7 @@ h1 {
   }
 
   h1 {
-    font-size: 28.5px;
+    font-size: 19px;
     margin: 3px 0 1px;
   }
 
@@ -777,7 +772,7 @@ h1 {
   }
 
   .country-navigation {
-    height: 60px;
+    height: 44px;
   }
 
   .gesture-hint {
@@ -789,8 +784,8 @@ h1 {
   }
 
   .tab-bar {
-    height: 42px;
-    flex-basis: 42px;
+    height: 38px;
+    flex-basis: 38px;
   }
 
   #panel-player {
@@ -798,16 +793,16 @@ h1 {
   }
 
   .music-panel > .section-heading {
-    height: 32px;
-    min-height: 32px;
-    flex-basis: 32px;
+    height: 18px;
+    min-height: 18px;
+    flex-basis: 18px;
   }
 
   #chart-status {
-    height: 21px;
-    min-height: 21px;
-    flex-basis: 21px;
-    line-height: 21px;
+    height: 12px;
+    min-height: 12px;
+    flex-basis: 12px;
+    line-height: 12px;
   }
 
   .track-card {
@@ -843,33 +838,9 @@ h1 {
   }
 
   .playback-status {
-    min-height: 21px;
-    flex-basis: 21px;
-    line-height: 21px;
-  }
-}
-
-@media (max-width: 360px) {
-  .header {
-    padding-inline: 8px;
-  }
-
-  .tab-bar [role="tab"] {
-    gap: 2px;
-    padding-inline: 2px;
-  }
-
-  #tab-player {
-    flex-grow: 1.2;
-  }
-
-  .brand {
-    gap: 4px;
-  }
-
-  .brand img {
-    width: 32px;
-    height: 32px;
+    min-height: 12px;
+    flex-basis: 12px;
+    line-height: 12px;
   }
 }
 
