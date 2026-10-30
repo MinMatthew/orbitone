@@ -1,4 +1,4 @@
-import { $, icon, escapeHTML as esc, safeImage, toast, shareText } from './lib.js?v=2';
+import { $, icon, escapeHTML as esc, safeImage, toast, shareText } from './lib.js?v=3';
 import { countries, loadChart, loadChartIndex, hasChart, systemCountry } from './data.js?v=3';
 import { createGlobe } from './globe.js?v=25';
 import { parseMediaURL } from './player.js?v=23';
@@ -9,6 +9,7 @@ import { setupPWA } from './pwa.js?v=4';
 import { applyLocale, countryLabel, t } from './i18n.js?v=1';
 
 document.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon);});
+document.querySelectorAll('[data-close]').forEach(el=>{el.innerHTML=icon('close');});
 let country=systemCountry(),tracks=[],current=null,chartToken=0,globe=null,chart=null,mediaTarget=null;
 const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 let keyDeclined=false,keyWaiter=null;

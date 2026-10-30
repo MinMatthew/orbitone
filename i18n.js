@@ -1,4 +1,4 @@
-import { escapeHTML } from './lib.js?v=2';
+import { escapeHTML } from './lib.js?v=3';
 
 // Only the option dialogs (install guide, API key guide) and their toasts follow the device language; the rest of the UI is English.
 const tags = navigator.languages?.length ? [...navigator.languages] : [navigator.language || 'en'];

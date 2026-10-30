@@ -119,6 +119,8 @@ h1 {
   line-height: 1.2;
   font-weight: 600;
   letter-spacing: -1.2px;
+  /* Matches the visible gap below the icon: the wordmark font leaves more empty space above its glyphs than the tagline does below. */
+  margin-bottom: 6.6px;
   animation-delay: .84s;
 }
 
@@ -952,4 +954,23 @@ h1 {
   .globe-stage {
     min-height: 120px;
   }
+}
+
+/* Dialog close button: deep logo-purple circle with a bold, round-capped white X. */
+.dialog-heading [data-close] {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  padding: 0;
+  color: #fff;
+  background: #5b45d9;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: none;
+}
+
+.dialog-heading [data-close] svg {
+  width: 18px;
+  height: 18px;
+  stroke-linecap: round;
 }
