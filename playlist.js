@@ -1,4 +1,4 @@
-import { $, escapeHTML as esc, icon, readStore, writeStore, safeImage, shareText, toast } from './lib.js';
+import { $, escapeHTML as esc, icon, readStore, writeStore, safeImage, shareText, toast } from './lib.js?v=4';
 import { countries } from './data.js?v=3';
 const place=t=>countries.find(c=>c.code===t.country)?.en||t.countryName||'';
 export const searchLink=(track,provider)=>provider==='spotify'?`https://open.spotify.com/search/${encodeURIComponent(`${track.artist} ${track.title}`)}`:`https://music.youtube.com/search?q=${encodeURIComponent(`${track.artist} ${track.title}`)}`;

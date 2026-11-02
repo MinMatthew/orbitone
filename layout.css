@@ -668,6 +668,74 @@ h1 {
   font-size: 12px;
 }
 
+.service-picker {
+  margin: 4px 0 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.service-picker legend {
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+#settings-dialog .service-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 8px 0 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .6);
+  cursor: pointer;
+}
+
+#settings-dialog .service-option input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  padding: 0;
+  accent-color: #a764bb;
+}
+
+#settings-dialog .service-option:has(input:checked) {
+  border-color: #a764bb;
+  background: #fff;
+  box-shadow: 0 0 0 1px #a764bb;
+}
+
+#settings-dialog .service-option:has(input:focus-visible) {
+  outline: 2px solid #a764bb;
+  outline-offset: 2px;
+}
+
+.service-option span {
+  display: grid;
+  gap: 2px;
+}
+
+.service-option strong {
+  font-size: 13px;
+}
+
+.service-option small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.service-notice {
+  margin: 10px 0 0;
+}
+
+#youtube-settings {
+  margin-top: 12px;
+}
+
 .key-actions {
   display: flex;
   align-items: center;

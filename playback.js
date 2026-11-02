@@ -3,6 +3,7 @@ import { Player } from './player.js?v=23';
 import { Preview, findPreview } from './preview.js?v=20';
 import { cacheGet, cacheSet, lookupKey } from './cache.js?v=20';
 import { getKey, searchVideoIds, KeyError, QuotaError } from './youtube.js?v=21';
+import { SERVICES, serviceLink, openLink } from './services.js?v=1';
 
 const PREVIEW_MESSAGE = '30-second preview';
 
@@ -10,7 +11,7 @@ const PREVIEW_MESSAGE = '30-second preview';
 export class Playback {
   /**
    * hooks: onChange({state, mode, track, message}), onProgress(seconds, duration), onEnded(track),
-   * onPrevious(), onNext(), toast(text), askKey(problem) -> Promise<boolean>
+   * onPrevious(), onNext(), toast(text), askKey(problem) -> Promise<boolean>, service() -> 'youtube' | 'spotify' | 'apple'
    */
   constructor(hooks) {
     this.hooks = hooks;
@@ -70,6 +71,10 @@ export class Playback {
 
   async play(track, mode = 'preview', options = {}) {
     this.halt();
+    if (mode === 'full' && this.hooks.service() !== 'youtube') {
+      this.openExternal(track);
+      return;
+    }
     this.preview.unlock();
     const token = this.token;
     this.track = track;
@@ -81,6 +86,16 @@ export class Playback {
     }
     if (mode === 'full') await this.startFull(track, token, options);
     else await this.startPreview(track, token, { allowFull: true, prompt: options.prompt });
+  }
+
+  // Must run synchronously inside the tap so the browser lets the other app open.
+  openExternal(track) {
+    const service = this.hooks.service();
+    const { label } = SERVICES[service];
+    this.mode = null;
+    this.track = null;
+    if (openLink(serviceLink(service, track, this.player.mapping(track)))) this.stop(`Opened in ${label}. Press play there if it does not start.`);
+    else this.fail(`Could not open ${label}. Please allow pop-ups and try again.`);
   }
 
   async startPreview(track, token, { allowFull = false, prompt } = {}) {
