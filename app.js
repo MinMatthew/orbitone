@@ -5,9 +5,11 @@ import { parseMediaURL } from './player.js?v=23';
 import { Playback } from './playback.js?v=25';
 import { getKey, setKey, searchCandidates } from './youtube.js?v=21';
 import { Playlist } from './playlist.js?v=3';
-import { setupPWA } from './pwa.js?v=5';
-import { applyLocale, countryLabel, t } from './i18n.js?v=2';
+import { setupPWA } from './pwa.js?v=9';
+import { applyLocale, countryLabel, t, lang } from './i18n.js?v=6';
 import { getService, setService } from './services.js?v=1';
+import { playChime } from './chime.js?v=1';
+import { renderUpdates } from './updates.js?v=1';
 
 document.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon);});
 document.querySelectorAll('[data-close]').forEach(el=>{el.innerHTML=icon('close');});
@@ -53,10 +55,15 @@ $('refresh').onclick=()=>selectCountry(country);$('country-prev').onclick=()=>cy
 function countryOptions(query=''){const host=$('country-options');host.replaceChildren();countries.filter(c=>`${c.name} ${countryLabel(c).name} ${c.en} ${c.code}`.toLowerCase().includes(query.toLowerCase())).forEach(c=>{const label=countryLabel(c),button=document.createElement('button');button.innerHTML=`${esc(label.name)}<small>${esc([label.sub,hasChart(c)?'':'No chart'].filter(Boolean).join(' · '))}</small>`;button.onclick=()=>{$('country-dialog').close();selectCountry(c);};host.append(button);});}
 $('country-open').onclick=()=>{countryOptions();$('country-search').value='';$('country-dialog').showModal();$('country-search').focus();};$('country-search').oninput=e=>countryOptions(e.target.value);
 $('settings-open').onclick=()=>$('settings-dialog').showModal();$('settings-form').onsubmit=e=>{e.preventDefault();const value=$('youtube-key').value.trim();if(!value){toast(t('settings.empty'));return;}setKey(value);$('youtube-key').value='';$('settings-dialog').close();toast(t('settings.saved'));};$('youtube-key-clear').onclick=()=>{setKey('');$('youtube-key').value='';toast(t('settings.cleared'));};
+// PayPal opens in another tab and reports nothing back, so thank the user when they return, or on ?thanks=1 if the PayPal link redirects here.
+let supportPending=false;
+document.querySelectorAll('[data-support]').forEach(link=>link.addEventListener('click',()=>{supportPending=true;$('support-thanks').hidden=true;}));
+document.addEventListener('visibilitychange',()=>{if(supportPending&&document.visibilityState==='visible'){supportPending=false;$('support-thanks').hidden=false;}});
+{const params=new URLSearchParams(location.search);if(params.get('thanks')==='1'){params.delete('thanks');const rest=params.toString();history.replaceState(null,'',`${location.pathname}${rest?`?${rest}`:''}${location.hash}`);$('support-thanks').hidden=false;setTimeout(()=>toast(t('support.thanks')),3600);}}
 $('media-form').onsubmit=e=>{e.preventDefault();try{const link=parseMediaURL($('media-url').value);player.connect(mediaTarget,link);$('media-dialog').close();if(current?.id===mediaTarget.id)playCurrent('full');toast('Player link saved on this device.');}catch(error){toast(error.message);}};
 $('play-sequence').onclick=()=>playlist.start();$('play-shuffle').onclick=()=>playlist.start(true);$('discover').onclick=()=>showTab('player');$('export-open').onclick=()=>$('export-dialog').showModal();$('share-playlist').onclick=()=>shareText(playlist.exportText());$('download-playlist').onclick=()=>playlist.download();for(const provider of ['youtube','spotify'])$(`copy-${provider}`).onclick=async()=>{const text=playlist.exportText(provider);try{await navigator.clipboard.writeText(text);toast('Search links copied.');}catch{$('export-text').hidden=false;$('export-text').value=text;$('export-text').select();}};
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}}));
-$('chart-open').onclick=()=>{$('chart-dialog-heading').textContent=$('chart-heading').textContent;$('chart-dialog').showModal();};$('chart-list').addEventListener('click',e=>{if(e.target.closest('.chart-row'))$('chart-dialog').close();});applyLocale();setupPWA();selectCountry(country);loadChartIndex().then(()=>globe?.refresh());createGlobe(selectCountry,country).then(g=>{globe=g;g.select(country);}).catch(()=>{$('globe-loading').textContent="Couldn't load the globe. Use the country menu instead.";});
+$('chart-open').onclick=()=>{$('chart-dialog-heading').textContent=$('chart-heading').textContent;$('chart-dialog').showModal();};$('chart-list').addEventListener('click',e=>{if(e.target.closest('.chart-row'))$('chart-dialog').close();});applyLocale();renderUpdates($('update-list'),lang);setupPWA();selectCountry(country);loadChartIndex().then(()=>globe?.refresh());createGlobe(selectCountry,country).then(g=>{globe=g;g.select(country);}).catch(()=>{$('globe-loading').textContent="Couldn't load the globe. Use the country menu instead.";});
 const INTRO_KEY='orbitone-intro-seen';
 const intro=$('globe-intro');
 function introSeen(){try{return localStorage.getItem(INTRO_KEY)==='1';}catch{return false;}}
@@ -70,3 +77,6 @@ function hideSplash(){clearTimeout(splashTimer);const splash=$('splash');if(!spl
 requestAnimationFrame(()=>{const painted=performance.getEntriesByName('first-paint')[0]?.startTime??performance.now();splashTimer=setTimeout(hideSplash,Math.max(0,painted+2800-performance.now()));});
 // Dismiss on click (after pointerup) so the tap cannot fall through to a control underneath.
 $('splash')?.addEventListener('click',hideSplash);
+// Icon, tagline and wordmark fade in on staggered CSS delays; chime as each begins. The icon's start can pass while modules load, so read the animation clock instead of listening for events.
+const splashEl=$('splash');
+if(splashEl&&!matchMedia('(prefers-reduced-motion: reduce)').matches)[['img',0],['.splash-tagline',1],['.splash-wordmark',2]].forEach(([selector,step])=>{const animation=splashEl.querySelector(selector)?.getAnimations()[0];if(!animation)return;const wait=animation.effect.getTiming().delay-(animation.currentTime??0);if(wait>-400)setTimeout(()=>{if(splashEl.isConnected&&!splashEl.classList.contains('hide'))playChime(step);},Math.max(0,wait));});
