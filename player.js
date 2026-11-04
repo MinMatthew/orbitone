@@ -1,15 +1,16 @@
-import { $, readStore, writeStore } from './lib.js';
+import { $, readStore, writeStore, escapeHTML } from './lib.js?v=5';
+import { t } from './i18n.js?v=7';
 
 let ytReady, spotifyReady;
 
 function youtubeSDK() {
   if (window.YT?.Player) return Promise.resolve(window.YT);
   ytReady ??= new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => { ytReady = null; reject(new Error('YouTube connection timed out')); }, 15000);
+    const timeout = setTimeout(() => { ytReady = null; reject(new Error(t('ui.ytTimeout'))); }, 15000);
     window.onYouTubeIframeAPIReady = () => { clearTimeout(timeout); resolve(window.YT); };
     const script = document.createElement('script');
     script.src = 'https://www.youtube.com/iframe_api';
-    script.onerror = () => { clearTimeout(timeout); ytReady = null; reject(new Error('YouTube connection failed')); };
+    script.onerror = () => { clearTimeout(timeout); ytReady = null; reject(new Error(t('ui.ytConnFail'))); };
     document.head.append(script);
   });
   return ytReady;
@@ -17,11 +18,11 @@ function youtubeSDK() {
 
 function spotifySDK() {
   spotifyReady ??= new Promise((resolve, reject) => {
-    const timer = setTimeout(() => { spotifyReady = null; reject(new Error('Spotify connection timed out')); }, 15000);
+    const timer = setTimeout(() => { spotifyReady = null; reject(new Error(t('ui.spTimeout'))); }, 15000);
     window.onSpotifyIframeApiReady = api => { clearTimeout(timer); resolve(api); };
     const script = document.createElement('script');
     script.src = 'https://open.spotify.com/embed/iframe-api/v1';
-    script.onerror = () => { clearTimeout(timer); spotifyReady = null; reject(new Error('Spotify connection failed')); };
+    script.onerror = () => { clearTimeout(timer); spotifyReady = null; reject(new Error(t('ui.spConnFail'))); };
     document.head.append(script);
   });
   return spotifyReady;
@@ -29,7 +30,7 @@ function spotifySDK() {
 
 export function parseMediaURL(value) {
   const url = new URL(value);
-  if (url.protocol !== 'https:') throw new Error('Please enter an HTTPS link.');
+  if (url.protocol !== 'https:') throw new Error(t('ui.needHttps'));
   let youtube;
   if (['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com'].includes(url.hostname)) {
     youtube = url.searchParams.get('v') || url.pathname.match(/^\/(?:embed|shorts)\/([\w-]{11})/)?.[1];
@@ -39,10 +40,10 @@ export function parseMediaURL(value) {
   if (youtube && /^[\w-]{11}$/.test(youtube)) return { youtube };
   const spotify = url.hostname === 'open.spotify.com' && url.pathname.match(/^(?:\/intl-[a-z]+)?\/track\/([A-Za-z0-9]{22})\/?$/)?.[1];
   if (spotify) return { spotify };
-  throw new Error('Please check that this is a YouTube video or Spotify track link.');
+  throw new Error(t('ui.badLink'));
 }
 
-const PLACEHOLDER = '<div class="video-placeholder"><p>Music with its scene</p><small>Press Play full track to show the YouTube player</small></div>';
+const placeholder = () => `<div class="video-placeholder"><p>${escapeHTML(t('ui.placeholderTitle'))}</p><small>${escapeHTML(t('ui.placeholderBody'))}</small></div>`;
 
 // Video embeds only. `emit(type, detail)` reports: playing, paused, buffering, blocked, muted, ended, retry, exhausted, failed.
 export class Player {
@@ -69,7 +70,7 @@ export class Player {
       try { this[name]?.destroy(); } catch { /* player already gone */ }
       this[name] = null;
     }
-    $('media-host').innerHTML = PLACEHOLDER;
+    $('media-host').innerHTML = placeholder();
   }
 
   warmup() { youtubeSDK().catch(() => {}); }

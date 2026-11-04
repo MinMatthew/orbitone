@@ -1,11 +1,10 @@
-import { safeImage } from './lib.js';
-import { Player } from './player.js?v=23';
-import { Preview, findPreview } from './preview.js?v=20';
-import { cacheGet, cacheSet, lookupKey } from './cache.js?v=20';
-import { getKey, searchVideoIds, KeyError, QuotaError } from './youtube.js?v=21';
+import { safeImage } from './lib.js?v=5';
+import { t } from './i18n.js?v=7';
+import { Player } from './player.js?v=24';
+import { Preview, findPreview } from './preview.js?v=21';
+import { cacheGet, cacheSet, lookupKey } from './cache.js?v=21';
+import { getKey, searchVideoIds, KeyError, QuotaError } from './youtube.js?v=22';
 import { SERVICES, serviceLink, openLink } from './services.js?v=1';
-
-const PREVIEW_MESSAGE = '30-second preview';
 
 // States: idle | loading | playing | paused | error. Modes: preview | full. One track plays at a time.
 export class Playback {
@@ -23,11 +22,11 @@ export class Playback {
     this.pending = new Map();
     this.player = new Player((type, detail) => this.onVideo(type, detail));
     this.preview = new Preview({
-      playing: () => this.set('playing', `${PREVIEW_MESSAGE} playing`),
-      paused: () => this.set('paused', 'Paused'),
-      buffering: () => this.set('loading', 'Loading…'),
-      ended: () => this.finish('The preview has ended.'),
-      error: () => this.fail('The preview could not be played.'),
+      playing: () => this.set('playing', t('ui.previewPlaying')),
+      paused: () => this.set('paused', t('ui.paused')),
+      buffering: () => this.set('loading', t('ui.loading')),
+      ended: () => this.finish(t('ui.previewEnded')),
+      error: () => this.fail(t('ui.previewError')),
       progress: (seconds, duration) => this.hooks.onProgress(seconds, Number.isFinite(duration) ? duration : 30),
     });
     this.bindMediaSession();
@@ -47,7 +46,7 @@ export class Playback {
     this.hooks.onProgress(0, 0);
   }
 
-  stop(message = 'Playback stopped.') {
+  stop(message = t('ui.stopped')) {
     this.halt();
     this.mode = null;
     this.track = null;
@@ -81,7 +80,7 @@ export class Playback {
     this.mode = mode;
     this.showMetadata(track);
     if (!navigator.onLine) {
-      this.set('error', 'Playback is unavailable offline. Please check your connection.');
+      this.set('error', t('ui.offlineUnavailable'));
       return;
     }
     if (mode === 'full') await this.startFull(track, token, options);
@@ -94,30 +93,30 @@ export class Playback {
     const { label } = SERVICES[service];
     this.mode = null;
     this.track = null;
-    if (openLink(serviceLink(service, track, this.player.mapping(track)))) this.stop(`Opened in ${label}. Press play there if it does not start.`);
-    else this.fail(`Could not open ${label}. Please allow pop-ups and try again.`);
+    if (openLink(serviceLink(service, track, this.player.mapping(track)))) this.stop(t('ui.opened', { service: label }));
+    else this.fail(t('ui.openFailed', { service: label }));
   }
 
   async startPreview(track, token, { allowFull = false, prompt } = {}) {
     this.mode = 'preview';
-    this.set('loading', `Loading ${PREVIEW_MESSAGE}…`);
+    this.set('loading', t('ui.loadingPreview'));
     let url = null;
     try {
       url = await findPreview(track);
     } catch {
       if (token === this.token) {
-        this.hooks.toast('Could not load the preview. Please check your network.');
-        this.fail('Could not load the preview.');
+        this.hooks.toast(t('ui.previewLoadToast'));
+        this.fail(t('ui.previewLoadFail'));
       }
       return;
     }
     if (token !== this.token) return;
     if (!url) {
       if (allowFull) {
-        this.hooks.toast('This track has no preview, so switching to full-track playback.');
+        this.hooks.toast(t('ui.noPreviewSwitch'));
         await this.play(track, 'full', { prompt });
       } else {
-        this.fail('This track has no playable preview.');
+        this.fail(t('ui.noPreview'));
       }
       return;
     }
@@ -125,12 +124,12 @@ export class Playback {
       await this.preview.start(url);
     } catch (error) {
       if (token !== this.token || error?.name === 'AbortError') return;
-      this.set('paused', 'Press play to start.');
+      this.set('paused', t('ui.pressPlay'));
     }
   }
 
   async startFull(track, token, options) {
-    this.set('loading', 'Preparing full-track playback…');
+    this.set('loading', t('ui.preparingFull'));
     const manual = this.player.mapping(track);
     if (!manual.youtube && manual.spotify) {
       await this.player.playSpotify(manual.spotify);
@@ -143,27 +142,27 @@ export class Playback {
       } catch (error) {
         if (token !== this.token) return;
         const text = error instanceof QuotaError
-          ? "Today's YouTube search quota is used up, so playing the 30-second preview."
+          ? t('ui.quotaOut')
           : error instanceof KeyError
-            ? 'The YouTube API key cannot be used, so playing the 30-second preview.'
-            : 'YouTube search failed, so playing the 30-second preview.';
+            ? t('ui.keyUnusable')
+            : t('ui.searchFailedPreview');
         this.hooks.toast(text);
         await this.startPreview(track, token);
         return;
       }
       if (token !== this.token) return;
       if (!ids) {
-        this.hooks.toast('No API key, so playing the 30-second preview.');
+        this.hooks.toast(t('ui.noKeyPreview'));
         await this.startPreview(track, token);
         return;
       }
       if (!ids.length) {
-        this.hooks.toast('No playable YouTube video found, so playing the preview.');
+        this.hooks.toast(t('ui.noVideoPreview'));
         await this.startPreview(track, token);
         return;
       }
     }
-    this.set('loading', 'Loading the YouTube player…');
+    this.set('loading', t('ui.loadingYoutube'));
     this.player.playYoutube(ids);
   }
 
@@ -202,26 +201,26 @@ export class Playback {
     const token = this.token;
     switch (type) {
       case 'playing':
-        this.set('playing', 'YouTube · Playing full track');
+        this.set('playing', t('ui.ytPlaying'));
         clearInterval(this.timer);
         this.timer = setInterval(() => {
           const { current, duration } = this.player.position();
           this.hooks.onProgress(current, duration);
         }, 500);
         break;
-      case 'paused': this.set('paused', 'Paused'); break;
-      case 'buffering': this.set('loading', 'Loading…'); break;
-      case 'blocked': this.set('paused', 'Press the play button inside the video.'); break;
-      case 'muted': this.hooks.toast('Playing without sound. Please unmute the video.'); this.set('playing', 'YouTube · Playing muted'); break;
+      case 'paused': this.set('paused', t('ui.paused')); break;
+      case 'buffering': this.set('loading', t('ui.loading')); break;
+      case 'blocked': this.set('paused', t('ui.pressInVideo')); break;
+      case 'muted': this.hooks.toast(t('ui.muted')); this.set('playing', t('ui.ytMuted')); break;
       case 'retry':
-        this.hooks.toast('This video cannot be played, so trying another candidate.');
-        this.set('loading', 'Loading another video…');
+        this.hooks.toast(t('ui.retry'));
+        this.set('loading', t('ui.loadingAnother'));
         break;
-      case 'ended': this.finish('Playback has ended.'); break;
+      case 'ended': this.finish(t('ui.ended')); break;
       case 'exhausted':
       case 'failed':
         clearInterval(this.timer);
-        this.hooks.toast('The YouTube video cannot be played, so switching to the 30-second preview.');
+        this.hooks.toast(t('ui.ytFailedPreview'));
         this.startPreview(track, token);
         break;
     }

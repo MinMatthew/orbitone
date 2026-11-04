@@ -1,8 +1,14 @@
-import { escapeHTML } from './lib.js?v=4';
+import { UI } from './ui-strings.js?v=1';
 
-// Only the option dialogs (install guide, API key guide) and their toasts follow the device language; the rest of the UI is English.
+const escapeHTML = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// The whole UI follows the device language. The first language in the preference list that we translate wins, so
+// ['pt-BR', 'ko'] shows Korean rather than English. `?lang=xx` forces a language for testing.
+export const SUPPORTED = ['en', 'ko', 'ja', 'zh', 'es', 'fr', 'de'];
 const tags = navigator.languages?.length ? [...navigator.languages] : [navigator.language || 'en'];
-export const lang = (tags[0] || 'en').toLowerCase().split('-')[0];
+const primary = tag => String(tag || '').toLowerCase().split('-')[0];
+const forced = new URLSearchParams(location.search).get('lang');
+export const lang = SUPPORTED.includes(forced) ? forced : (tags.map(primary).find(code => SUPPORTED.includes(code)) ?? 'en');
 
 const LINKS = {
   cloud: 'https://console.cloud.google.com/projectcreate',
@@ -302,7 +308,7 @@ const DICT = {
   }
 };
 
-const strings = { ...DICT.en, ...DICT[lang] };
+const strings = { ...DICT.en, ...UI.en, ...DICT[lang], ...UI[lang] };
 
 export const t = (key, vars = {}) => (strings[key] ?? key).replace(/\{(\w+)\}/g, (_, name) => vars[name] ?? '');
 
@@ -313,13 +319,21 @@ const rich = text => escapeHTML(text)
   .replace(/`([^`]+)`/g, '<code>$1</code>');
 
 export function applyLocale() {
+  document.documentElement.lang = lang;
+  document.title = `Orbitone — ${t('ui.tagline')}`;
   for (const id of ['install-dialog', 'settings-dialog']) document.getElementById(id).lang = lang;
   document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = rich(t(el.dataset.i18n)); });
   document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll('[data-i18n-alt]').forEach(el => { el.alt = t(el.dataset.i18nAlt); });
 }
 
+// Country names use the first device language even when we have no translation for the rest of the UI.
+const nameTag = forced || tags[0] || 'en';
+const nameLang = primary(nameTag) || 'en';
 let regionNames = null;
-try { regionNames = new Intl.DisplayNames([tags[0] || 'en'], { type: 'region' }); } catch { /* unsupported locale */ }
+try { regionNames = new Intl.DisplayNames([nameTag], { type: 'region' }); } catch { /* unsupported locale */ }
 
 // Name follows the device language; the small English line is dropped when the device language is English.
 export function countryLabel(country) {
@@ -327,10 +341,10 @@ export function countryLabel(country) {
   let name = '';
   if (country.code) {
     try { name = regionNames?.of(country.code.toUpperCase()) || ''; } catch { /* unknown region */ }
-    if (!name || name.toUpperCase() === country.code.toUpperCase()) name = lang === 'ko' ? country.name : english;
+    if (!name || name.toUpperCase() === country.code.toUpperCase()) name = nameLang === 'ko' ? country.name : english;
   } else {
     name = english;
   }
-  const sub = lang === 'en' || name.toUpperCase() === english.toUpperCase() ? '' : english.toUpperCase();
+  const sub = nameLang === 'en' || name.toUpperCase() === english.toUpperCase() ? '' : english.toUpperCase();
   return { name, sub };
 }

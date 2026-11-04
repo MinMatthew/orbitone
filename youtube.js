@@ -1,4 +1,5 @@
 // Client-side YouTube Data API access. The key is the user's own and stays on this device.
+import { t } from './i18n.js?v=7';
 const KEY_NAME = 'orbitone-youtube-key';
 const PENALIZED = ['live', 'cover', 'reaction', 'remix', 'karaoke', 'instrumental'];
 const QUOTA_REASONS = ['quotaExceeded', 'dailyLimitExceeded', 'rateLimitExceeded'];
@@ -59,7 +60,7 @@ export function rankVideos(items, track) {
 export function apiError(status, body) {
   const reason = body?.error?.errors?.[0]?.reason || body?.error?.status || '';
   if (QUOTA_REASONS.includes(reason)) return new QuotaError(reason);
-  if (status === 400 || status === 403) return new KeyError(body?.error?.message || reason || 'Please check your API key.');
+  if (status === 400 || status === 403) return new KeyError(body?.error?.message || reason || t('ui.checkKey'));
   return new Error(`YouTube ${status}`);
 }
 

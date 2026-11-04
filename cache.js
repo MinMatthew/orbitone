@@ -1,4 +1,4 @@
-import { normalize } from './youtube.js?v=20';
+import { normalize } from './youtube.js?v=22';
 
 const DB_NAME = 'orbitone-lookups';
 const STORE = 'lookups';
