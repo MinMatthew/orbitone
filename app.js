@@ -8,7 +8,7 @@ import { setupPWA } from './pwa.js?v=10';
 import { applyLocale, countryLabel, t, lang, SUPPORTED, LANG_NAMES, setLangPref } from './i18n.js?v=11';
 import { getService, setService } from './services.js?v=2';
 import { playChime } from './chime.js?v=1';
-import { renderUpdates } from './updates.js?v=4';
+import { renderUpdates } from './updates.js?v=5';
 
 // Earlier versions asked listeners for their own YouTube API key; links now come with the charts.
 try{localStorage.removeItem('orbitone-youtube-key');}catch{/* storage unavailable */}
