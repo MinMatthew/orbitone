@@ -1,8 +1,8 @@
 import { $, icon, escapeHTML as esc, safeImage, toast, shareText, readStore, writeStore } from './lib.js?v=5';
 import { countries, loadChart, loadChartIndex, hasChart, systemCountry } from './data.js?v=5';
 import { createGlobe } from './globe.js?v=26';
-import { parseMediaURL } from './player.js?v=24';
-import { Playback } from './playback.js?v=28';
+import { parseMediaURL } from './player.js?v=25';
+import { Playback } from './playback.js?v=29';
 import { Playlist } from './playlist.js?v=4';
 import { setupPWA } from './pwa.js?v=10';
 import { applyLocale, countryLabel, t, lang, SUPPORTED, LANG_NAMES, setLangPref } from './i18n.js?v=11';
@@ -29,7 +29,8 @@ function renderProgress(seconds,duration){const ratio=duration>0?Math.min(second
 const playback=new Playback({onChange:render,onProgress:renderProgress,onEnded:()=>{if(!playlist.next())toast(t('ui.ended'));},onPrevious:()=>moveTrack(-1),onNext:()=>moveTrack(1),toast,service:getService});
 const player=playback.player;
 const playlist=new Playlist(track=>{showTab('player');selectTrack(track,false);playCurrent('full');},updateAddButton);
-$('tab-playlist').addEventListener('pointerdown',()=>player.warmup(),{once:true});
+// Load the YouTube player on the first tap so the video can start inside the next tap, which is what lets it play with sound.
+let ytWarm=false;document.addEventListener('pointerdown',()=>{if(ytWarm||getService()!=='youtube')return;ytWarm=true;player.warmup();},true);
 function syncService(){const service=getService();document.querySelectorAll('input[name=service]').forEach(radio=>{radio.checked=radio.value===service;});}
 document.querySelectorAll('input[name=service]').forEach(radio=>radio.addEventListener('change',()=>{if(radio.checked){setService(radio.value);syncService();}}));syncService();
 const langSelect=$('lang-select');langSelect.innerHTML=SUPPORTED.map(code=>`<option value="${code}">${LANG_NAMES[code]}</option>`).join('');langSelect.value=lang;

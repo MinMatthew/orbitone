@@ -99,10 +99,11 @@ export class Player {
         this.yt.unMute();
         setTimeout(() => {
           if (token !== this.token) return;
-          if (this.yt.getPlayerState() === YT.PlayerState.PLAYING) return;
-          this.yt.mute();
-          this.yt.playVideo();
+          if (this.yt.getPlayerState() !== YT.PlayerState.PLAYING) { this.yt.mute(); this.yt.playVideo(); }
+          if (!this.yt.isMuted()) return;
           this.emit('muted');
+          // The next tap anywhere is a fresh gesture, which browsers accept for unmuting.
+          document.addEventListener('pointerdown', () => { if (token === this.token) this.yt?.unMute?.(); }, { once: true, capture: true });
         }, 1200);
       };
       // 2 invalid id, 5 HTML5 error, 100 removed/private, 101/150 embedding disallowed: try the next candidate.
