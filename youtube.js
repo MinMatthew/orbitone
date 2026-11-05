@@ -1,5 +1,5 @@
 // Client-side YouTube Data API access. The key is the user's own and stays on this device.
-import { t } from './i18n.js?v=7';
+import { t } from './i18n.js?v=9';
 const KEY_NAME = 'orbitone-youtube-key';
 const PENALIZED = ['live', 'cover', 'reaction', 'remix', 'karaoke', 'instrumental'];
 const QUOTA_REASONS = ['quotaExceeded', 'dailyLimitExceeded', 'rateLimitExceeded'];

@@ -6,10 +6,10 @@ import { Playback } from './playback.js?v=26';
 import { getKey, setKey, searchCandidates } from './youtube.js?v=22';
 import { Playlist } from './playlist.js?v=4';
 import { setupPWA } from './pwa.js?v=10';
-import { applyLocale, countryLabel, t, lang } from './i18n.js?v=7';
+import { applyLocale, countryLabel, t, lang, SUPPORTED, LANG_NAMES, setLangPref } from './i18n.js?v=9';
 import { getService, setService } from './services.js?v=1';
 import { playChime } from './chime.js?v=1';
-import { renderUpdates } from './updates.js?v=2';
+import { renderUpdates } from './updates.js?v=3';
 
 document.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon);});
 document.querySelectorAll('[data-close]').forEach(el=>{el.innerHTML=icon('close');});
@@ -34,6 +34,8 @@ function askKey(problem=''){const before=getKey();$('key-problem').hidden=!probl
 $('settings-dialog').addEventListener('close',()=>{if(keyWaiter){const done=keyWaiter;keyWaiter=null;done();}});
 function syncService(){const service=getService();document.querySelectorAll('input[name=service]').forEach(radio=>{radio.checked=radio.value===service;});$('youtube-settings').hidden=service!=='youtube';}
 document.querySelectorAll('input[name=service]').forEach(radio=>radio.addEventListener('change',()=>{if(radio.checked){setService(radio.value);syncService();}}));syncService();
+const langSelect=$('lang-select');langSelect.innerHTML=SUPPORTED.map(code=>`<option value="${code}">${LANG_NAMES[code]}</option>`).join('');langSelect.value=lang;
+langSelect.addEventListener('change',()=>{setLangPref(langSelect.value);const url=new URL(location.href);url.searchParams.delete('lang');location.replace(url);});
 function syncOffline(){const offline=!navigator.onLine;$('play').disabled=offline||!current;$('full-toggle').disabled=offline||!current;if(offline){playback.stop(t('ui.offline'));}else if(current){$('playback-status').textContent=t('ui.tapToStart');}}
 window.addEventListener('offline',syncOffline);window.addEventListener('online',syncOffline);
 function showTab(tab){for(const name of ['player','playlist']){const active=name===tab;$(`tab-${name}`).setAttribute('aria-selected',String(active));$(`tab-${name}`).tabIndex=active?0:-1;$(`panel-${name}`).hidden=!active;}}

@@ -1,5 +1,5 @@
 import { safeImage } from './lib.js?v=5';
-import { t } from './i18n.js?v=7';
+import { t } from './i18n.js?v=9';
 import { Player } from './player.js?v=24';
 import { Preview, findPreview } from './preview.js?v=21';
 import { cacheGet, cacheSet, lookupKey } from './cache.js?v=21';

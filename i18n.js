@@ -1,14 +1,23 @@
-import { UI } from './ui-strings.js?v=1';
+import { UI } from './ui-strings.js?v=3';
 
 const escapeHTML = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-// The whole UI follows the device language. The first language in the preference list that we translate wins, so
-// ['pt-BR', 'ko'] shows Korean rather than English. `?lang=xx` forces a language for testing.
+// Language order: `?lang=xx` (testing) > the language chosen in Options > the device language. Until a language is chosen
+// the first device language that we translate wins (['pt-BR', 'ko'] shows Korean) and is detected again on every launch.
 export const SUPPORTED = ['en', 'ko', 'ja', 'zh', 'es', 'fr', 'de'];
+export const LANG_NAMES = { en: 'English', ko: '한국어', ja: '日本語', zh: '简体中文', es: 'Español', fr: 'Français', de: 'Deutsch' };
+const LANG_KEY = 'orbitone-lang';
 const tags = navigator.languages?.length ? [...navigator.languages] : [navigator.language || 'en'];
 const primary = tag => String(tag || '').toLowerCase().split('-')[0];
 const forced = new URLSearchParams(location.search).get('lang');
-export const lang = SUPPORTED.includes(forced) ? forced : (tags.map(primary).find(code => SUPPORTED.includes(code)) ?? 'en');
+export function setLangPref(value) {
+  if (!SUPPORTED.includes(value)) return;
+  try { localStorage.setItem(LANG_KEY, value); } catch { /* Storage unavailable: the choice cannot be kept. */ }
+}
+let pref = null;
+try { const saved = localStorage.getItem(LANG_KEY); if (SUPPORTED.includes(saved)) pref = saved; } catch { /* storage unavailable */ }
+const systemLang = tags.map(primary).find(code => SUPPORTED.includes(code)) ?? 'en';
+export const lang = SUPPORTED.includes(forced) ? forced : (pref ?? systemLang);
 
 const LINKS = {
   cloud: 'https://console.cloud.google.com/projectcreate',
@@ -329,8 +338,8 @@ export function applyLocale() {
   document.querySelectorAll('[data-i18n-alt]').forEach(el => { el.alt = t(el.dataset.i18nAlt); });
 }
 
-// Country names use the first device language even when we have no translation for the rest of the UI.
-const nameTag = forced || tags[0] || 'en';
+// Country names use the chosen language, or else the first device language even without a UI translation for it.
+const nameTag = (SUPPORTED.includes(forced) && forced) || pref || tags[0] || 'en';
 const nameLang = primary(nameTag) || 'en';
 let regionNames = null;
 try { regionNames = new Intl.DisplayNames([nameTag], { type: 'region' }); } catch { /* unsupported locale */ }

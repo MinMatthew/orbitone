@@ -729,14 +729,16 @@ h1 {
   font-size: 12px;
 }
 
-.service-picker {
+.service-picker,
+.lang-picker {
   margin: 4px 0 0;
   padding: 0;
   border: 0;
   min-width: 0;
 }
 
-.service-picker legend {
+.service-picker legend,
+.lang-picker legend {
   padding: 0;
   font-size: 16px;
   font-weight: 600;
@@ -1242,9 +1244,30 @@ h1 {
   margin-left: 10px;
 }
 
-#settings-dialog .service-picker {
+#settings-dialog .lang-picker {
   clear: both;
   margin-top: 14px;
+}
+
+#settings-dialog .service-picker {
+  margin-top: 22px;
+}
+
+#lang-select {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .88);
+  color: #29232d;
+  font: inherit;
+  font-size: 16px;
+}
+
+#lang-select:focus-visible {
+  outline: 2px solid #a764bb;
+  outline-offset: 2px;
 }
 /* These labels used to be typed in capitals; translations are written normally. */
 footer p,

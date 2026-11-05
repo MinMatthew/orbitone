@@ -1,6 +1,18 @@
 // Newest first. Each entry lists what got better for users, per language; `en` is the fallback.
 export const UPDATES = [
   {
+    date: '2026-11-05',
+    notes: {
+      en: ['You can now choose the app language in Options. Until you do, it follows your device language.'],
+      ko: ['옵션에서 앱 언어를 직접 고를 수 있어요. 고르지 않으면 기기 언어를 따라가요.'],
+      ja: ['オプションでアプリの言語を選べるようになりました。選ばない場合は端末の言語に従います。'],
+      zh: ['现在可以在选项中选择应用语言。未选择时会跟随设备语言。'],
+      es: ['Ahora puedes elegir el idioma de la app en Opciones. Si no lo haces, sigue el idioma del dispositivo.'],
+      fr: ['Vous pouvez désormais choisir la langue de l’app dans les Options. Sans choix, elle suit la langue de l’appareil.'],
+      de: ['Du kannst die App-Sprache jetzt in den Optionen wählen. Ohne Auswahl folgt sie der Gerätesprache.']
+    }
+  },
+  {
     date: '2026-11-04',
     notes: {
       en: ['The whole app now follows your phone\'s language.', 'Star a country next to its name, and the arrow buttons will move only between your favorites.'],
