@@ -1,6 +1,6 @@
 import { $, escapeHTML as esc, icon, readStore, writeStore, safeImage, shareText, toast } from './lib.js?v=5';
-import { countries } from './data.js?v=4';
-import { t, countryLabel } from './i18n.js?v=9';
+import { countries } from './data.js?v=5';
+import { t, countryLabel } from './i18n.js?v=11';
 const place=track=>{const found=countries.find(c=>c.code===track.country);return found?countryLabel(found).name:track.countryName||'';};
 export const searchLink=(track,provider)=>provider==='spotify'?`https://open.spotify.com/search/${encodeURIComponent(`${track.artist} ${track.title}`)}`:`https://music.youtube.com/search?q=${encodeURIComponent(`${track.artist} ${track.title}`)}`;
 export function trackLink(t){return t.youtube?`https://www.youtube.com/watch?v=${t.youtube}`:t.url||searchLink(t,'youtube');}

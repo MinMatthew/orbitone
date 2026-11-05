@@ -1,16 +1,14 @@
 import { safeImage } from './lib.js?v=5';
-import { t } from './i18n.js?v=9';
+import { t } from './i18n.js?v=11';
 import { Player } from './player.js?v=24';
-import { Preview, findPreview } from './preview.js?v=21';
-import { cacheGet, cacheSet, lookupKey } from './cache.js?v=21';
-import { getKey, searchVideoIds, KeyError, QuotaError } from './youtube.js?v=22';
-import { SERVICES, serviceLink, openLink } from './services.js?v=1';
+import { Preview, findPreview } from './preview.js?v=22';
+import { SERVICES, serviceLink, openLink } from './services.js?v=2';
 
 // States: idle | loading | playing | paused | error. Modes: preview | full. One track plays at a time.
 export class Playback {
   /**
    * hooks: onChange({state, mode, track, message}), onProgress(seconds, duration), onEnded(track),
-   * onPrevious(), onNext(), toast(text), askKey(problem) -> Promise<boolean>, service() -> 'youtube' | 'spotify' | 'apple'
+   * onPrevious(), onNext(), toast(text), service() -> 'youtube' | 'spotify' | 'apple'
    */
   constructor(hooks) {
     this.hooks = hooks;
@@ -19,7 +17,6 @@ export class Playback {
     this.track = null;
     this.token = 0;
     this.timer = 0;
-    this.pending = new Map();
     this.player = new Player((type, detail) => this.onVideo(type, detail));
     this.preview = new Preview({
       playing: () => this.set('playing', t('ui.previewPlaying')),
@@ -68,7 +65,7 @@ export class Playback {
     this.hooks.onEnded(ended);
   }
 
-  async play(track, mode = 'preview', options = {}) {
+  async play(track, mode = 'preview') {
     this.halt();
     if (mode === 'full' && this.hooks.service() !== 'youtube') {
       this.openExternal(track);
@@ -83,8 +80,8 @@ export class Playback {
       this.set('error', t('ui.offlineUnavailable'));
       return;
     }
-    if (mode === 'full') await this.startFull(track, token, options);
-    else await this.startPreview(track, token, { allowFull: true, prompt: options.prompt });
+    if (mode === 'full') await this.startFull(track, token);
+    else await this.startPreview(track, token, { allowFull: true });
   }
 
   // Must run synchronously inside the tap so the browser lets the other app open.
@@ -97,7 +94,7 @@ export class Playback {
     else this.fail(t('ui.openFailed', { service: label }));
   }
 
-  async startPreview(track, token, { allowFull = false, prompt } = {}) {
+  async startPreview(track, token, { allowFull = false } = {}) {
     this.mode = 'preview';
     this.set('loading', t('ui.loadingPreview'));
     let url = null;
@@ -114,7 +111,7 @@ export class Playback {
     if (!url) {
       if (allowFull) {
         this.hooks.toast(t('ui.noPreviewSwitch'));
-        await this.play(track, 'full', { prompt });
+        await this.play(track, 'full');
       } else {
         this.fail(t('ui.noPreview'));
       }
@@ -128,71 +125,26 @@ export class Playback {
     }
   }
 
-  async startFull(track, token, options) {
+  async startFull(track, token) {
     this.set('loading', t('ui.preparingFull'));
     const manual = this.player.mapping(track);
     if (!manual.youtube && manual.spotify) {
       await this.player.playSpotify(manual.spotify);
       return;
     }
-    let ids = manual.youtube ? [manual.youtube] : null;
-    if (!ids) {
-      try {
-        ids = await this.lookupIds(track, token, options);
-      } catch (error) {
-        if (token !== this.token) return;
-        const text = error instanceof QuotaError
-          ? t('ui.quotaOut')
-          : error instanceof KeyError
-            ? t('ui.keyUnusable')
-            : t('ui.searchFailedPreview');
-        this.hooks.toast(text);
-        await this.startPreview(track, token);
-        return;
-      }
-      if (token !== this.token) return;
-      if (!ids) {
-        this.hooks.toast(t('ui.noKeyPreview'));
-        await this.startPreview(track, token);
-        return;
-      }
-      if (!ids.length) {
+    if (!manual.youtube) {
+      // No exact video is known yet: send the listener to a YouTube search; a blocked tab falls back to the preview.
+      if (openLink(serviceLink('youtube', track))) {
+        this.stop(t('ui.opened', { service: SERVICES.youtube.label }));
+        this.hooks.toast(t('ui.linkPending'));
+      } else {
         this.hooks.toast(t('ui.noVideoPreview'));
         await this.startPreview(track, token);
-        return;
       }
+      return;
     }
     this.set('loading', t('ui.loadingYoutube'));
-    this.player.playYoutube(ids);
-  }
-
-  // Returns video ids, or null when the user declined to provide an API key.
-  async lookupIds(track, token, options) {
-    const name = lookupKey('youtube', track);
-    const cached = await cacheGet(name);
-    if (cached?.ids?.length) return cached.ids;
-    let problem = '';
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      if (token !== this.token) return null;
-      if (!getKey() || problem) {
-        const mayAsk = options.prompt !== false || problem;
-        if (!mayAsk || !(await this.hooks.askKey(problem)) || !getKey()) return null;
-      }
-      try {
-        const ids = await this.dedupe(name, () => searchVideoIds(track, getKey()));
-        if (ids.length) await cacheSet(name, { ids });
-        return ids;
-      } catch (error) {
-        if (!(error instanceof KeyError)) throw error;
-        problem = error.message;
-      }
-    }
-    throw new KeyError(problem);
-  }
-
-  dedupe(name, task) {
-    if (!this.pending.has(name)) this.pending.set(name, task().finally(() => this.pending.delete(name)));
-    return this.pending.get(name);
+    this.player.playYoutube([manual.youtube]);
   }
 
   onVideo(type) {

@@ -1,5 +1,3 @@
-import { normalize } from './youtube.js?v=22';
-
 const DB_NAME = 'orbitone-lookups';
 const STORE = 'lookups';
 const TTL = 7 * 24 * 60 * 60 * 1000;
@@ -13,6 +11,14 @@ function open() {
     request.onerror = () => { opened = null; reject(request.error); };
   });
   return opened;
+}
+
+export function normalize(text) {
+  return String(text ?? '')
+    .toLowerCase()
+    .replace(/\s*[(\[]\s*(?:feat|ft|featuring|with)\b[^)\]]*[)\]]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 export const lookupKey = (kind, track) => `${kind}:${normalize(track.artist)}|${normalize(track.title)}`;

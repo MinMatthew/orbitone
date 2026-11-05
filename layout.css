@@ -699,34 +699,9 @@ h1 {
   overscroll-behavior: contain;
 }
 
-.key-guide summary {
-  margin: 8px 0;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.key-guide ol {
-  margin: 6px 0;
-  padding-left: 18px;
-  font-size: 12px;
-  line-height: 1.65;
-}
-
-.key-guide a,
 #settings-dialog a {
   color: #8e4da3;
   text-decoration: underline;
-}
-
-.key-guide code {
-  font-size: 11px;
-  overflow-wrap: anywhere;
-}
-
-.key-problem {
-  margin: 6px 0;
-  color: #c0344d;
-  font-size: 12px;
 }
 
 .service-picker,
@@ -793,10 +768,6 @@ h1 {
 
 .service-notice {
   margin: 10px 0 0;
-}
-
-#youtube-settings {
-  margin-top: 12px;
 }
 
 .updates summary {
@@ -870,32 +841,6 @@ h1 {
   border-radius: 10px;
   background: rgba(255, 255, 255, .24);
   color: #fff;
-}
-
-.key-actions {
-  display: flex;
-  align-items: stretch;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.key-actions .primary-button,
-.key-actions .pill-button {
-  min-height: 46px;
-  margin: 0;
-  font-size: 12px;
-}
-
-.key-actions .primary-button {
-  flex: 1 1 auto;
-  width: auto;
-  padding: 0 16px;
-}
-
-.key-actions .pill-button {
-  flex: none;
-  padding: 0 24px;
-  white-space: nowrap;
 }
 
 .track-card:has(#media-host iframe) .connect-link {

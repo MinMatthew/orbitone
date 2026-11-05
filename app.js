@@ -1,16 +1,17 @@
 import { $, icon, escapeHTML as esc, safeImage, toast, shareText, readStore, writeStore } from './lib.js?v=5';
-import { countries, loadChart, loadChartIndex, hasChart, systemCountry } from './data.js?v=4';
+import { countries, loadChart, loadChartIndex, hasChart, systemCountry } from './data.js?v=5';
 import { createGlobe } from './globe.js?v=26';
 import { parseMediaURL } from './player.js?v=24';
-import { Playback } from './playback.js?v=26';
-import { getKey, setKey, searchCandidates } from './youtube.js?v=22';
+import { Playback } from './playback.js?v=28';
 import { Playlist } from './playlist.js?v=4';
 import { setupPWA } from './pwa.js?v=10';
-import { applyLocale, countryLabel, t, lang, SUPPORTED, LANG_NAMES, setLangPref } from './i18n.js?v=9';
-import { getService, setService } from './services.js?v=1';
+import { applyLocale, countryLabel, t, lang, SUPPORTED, LANG_NAMES, setLangPref } from './i18n.js?v=11';
+import { getService, setService } from './services.js?v=2';
 import { playChime } from './chime.js?v=1';
-import { renderUpdates } from './updates.js?v=3';
+import { renderUpdates } from './updates.js?v=4';
 
+// Earlier versions asked listeners for their own YouTube API key; links now come with the charts.
+try{localStorage.removeItem('orbitone-youtube-key');}catch{/* storage unavailable */}
 document.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon);});
 document.querySelectorAll('[data-close]').forEach(el=>{el.innerHTML=icon('close');});
 let country=systemCountry(),tracks=[],current=null,chartToken=0,globe=null,chart=null,mediaTarget=null;
@@ -22,17 +23,14 @@ function toggleFavorite(){if(!country.code)return;const added=!favorites.has(cou
 const localCountry=track=>{const found=countries.find(c=>c.code===track.country);return found?countryLabel(found).name:track.countryName||'';};
 const sourceLabel=source=>/iTunes/.test(source)?t('ui.sourceItunes'):/Sample/.test(source)?t('ui.sourceDemo'):t('ui.sourceApple');
 const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-let keyDeclined=false,keyWaiter=null;
 const formatTime=seconds=>`${Math.floor(seconds/60)}:${String(Math.floor(seconds%60)).padStart(2,'0')}`;
 function render({state,mode,message}){const playing=state==='playing',busy=state==='loading',active=state!=='idle',preview=mode==='preview'&&active,full=mode==='full'&&active;$('play-icon').innerHTML=icon(preview&&playing?'pause':'preview');$('play').setAttribute('aria-label',preview&&playing?t('ui.pause30'):t('ui.play30'));$('play').title=preview&&playing?t('ui.pause30'):t('ui.title30');$('play').setAttribute('aria-pressed',String(preview));$('play').setAttribute('aria-busy',String(busy&&preview));$('play').classList.toggle('is-loading',busy&&preview);$('full-icon').innerHTML=icon(full&&playing?'pause':'play');$('full-toggle').setAttribute('aria-label',full&&playing?t('ui.pauseFull'):t('ui.playFull'));$('full-toggle').title=full&&playing?t('ui.pauseFull'):t('ui.playFull');$('full-toggle').setAttribute('aria-pressed',String(full));$('full-toggle').setAttribute('aria-busy',String(busy&&full));$('full-toggle').classList.toggle('is-loading',busy&&full);$('playback-status').textContent=message;$('mode-badge').hidden=!preview;$('full-note').hidden=!(isIOS&&full);}
 function renderProgress(seconds,duration){const ratio=duration>0?Math.min(seconds/duration,1):0;$('progress-fill').style.width=`${ratio*100}%`;$('progress-track').setAttribute('aria-valuenow',String(Math.round(ratio*100)));$('progress-time').textContent=formatTime(seconds||0);}
-const playback=new Playback({onChange:render,onProgress:renderProgress,onEnded:()=>{if(!playlist.next())toast(t('ui.ended'));},onPrevious:()=>moveTrack(-1),onNext:()=>moveTrack(1),toast,askKey,service:getService});
+const playback=new Playback({onChange:render,onProgress:renderProgress,onEnded:()=>{if(!playlist.next())toast(t('ui.ended'));},onPrevious:()=>moveTrack(-1),onNext:()=>moveTrack(1),toast,service:getService});
 const player=playback.player;
 const playlist=new Playlist(track=>{showTab('player');selectTrack(track,false);playCurrent('full');},updateAddButton);
 $('tab-playlist').addEventListener('pointerdown',()=>player.warmup(),{once:true});
-function askKey(problem=''){const before=getKey();$('key-problem').hidden=!problem;$('key-problem').textContent=problem?t('settings.problem',{problem}):'';return new Promise(resolve=>{keyWaiter=()=>{const key=getKey(),granted=!!key&&key!==before;keyDeclined=!granted;resolve(granted);};$('settings-dialog').showModal();$('youtube-key').focus();});}
-$('settings-dialog').addEventListener('close',()=>{if(keyWaiter){const done=keyWaiter;keyWaiter=null;done();}});
-function syncService(){const service=getService();document.querySelectorAll('input[name=service]').forEach(radio=>{radio.checked=radio.value===service;});$('youtube-settings').hidden=service!=='youtube';}
+function syncService(){const service=getService();document.querySelectorAll('input[name=service]').forEach(radio=>{radio.checked=radio.value===service;});}
 document.querySelectorAll('input[name=service]').forEach(radio=>radio.addEventListener('change',()=>{if(radio.checked){setService(radio.value);syncService();}}));syncService();
 const langSelect=$('lang-select');langSelect.innerHTML=SUPPORTED.map(code=>`<option value="${code}">${LANG_NAMES[code]}</option>`).join('');langSelect.value=lang;
 langSelect.addEventListener('change',()=>{setLangPref(langSelect.value);const url=new URL(location.href);url.searchParams.delete('lang');location.replace(url);});
@@ -56,14 +54,14 @@ async function selectCountry(next){const token=++chartToken;country=next;globe?.
  if(!hasChart(next)){$('track-title').textContent=t('ui.noChartTitle');$('chart-status').textContent=t('ui.noChartBody');$('chart-status').classList.add('warning');return;}
  chart=await loadChart(next);if(token!==chartToken)return;tracks=chart.tracks;const date=chart.updated?new Date(chart.updated):null;$('chart-status').textContent=`${chart.stale?t('ui.chartOffline'):''}${sourceLabel(chart.source)}${date&&!Number.isNaN(+date)?` · ${t('ui.updated',{date:date.toLocaleString(lang,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})})}`:''}`;$('chart-status').classList.toggle('warning',!!(chart.demo||chart.stale));$('play').disabled=!navigator.onLine;$('full-toggle').disabled=!navigator.onLine;$('add-track').disabled=false;selectTrack(tracks[0]);renderChart();
 }
-function playCurrent(mode='preview',{explicit=false}={}){if(!current||!navigator.onLine)return;const same=playback.track?.id===current.id&&playback.mode===mode;if(same&&playback.state==='loading')return;if(same&&explicit&&['playing','paused'].includes(playback.state)){playback.toggle();return;}playback.play(current,mode,{prompt:explicit||!keyDeclined});}
+function playCurrent(mode='preview',{explicit=false}={}){if(!current||!navigator.onLine)return;const same=playback.track?.id===current.id&&playback.mode===mode;if(same&&playback.state==='loading')return;if(same&&explicit&&['playing','paused'].includes(playback.state)){playback.toggle();return;}playback.play(current,mode);}
 function moveTrack(delta){if(playlist.queue.length){if(!playlist.next(delta))toast(t('ui.endOfPlaylist'));return;}if(!tracks.length)return;const wasActive=['playing','paused','loading'].includes(playback.state),prevMode=playback.mode,i=tracks.findIndex(t=>t.id===current?.id);selectTrack(tracks[(i+delta+tracks.length)%tracks.length]);if(wasActive)playCurrent(prevMode||'preview');}
-async function openMedia(track=current){if(!track)return;mediaTarget=track;$('media-track-name').textContent=`${track.title} — ${track.artist}`;$('media-url').value='';$('video-candidates').replaceChildren();if(!$('media-dialog').open)$('media-dialog').showModal();if(!getKey())return;$('video-candidates').textContent=t('ui.mediaSearching');try{const candidates=await searchCandidates(track,getKey());if(mediaTarget!==track||!$('media-dialog').open)return;$('video-candidates').replaceChildren();const note=document.createElement('p');note.textContent=candidates.length?t('ui.mediaCandidates'):t('ui.mediaNone');$('video-candidates').append(note);for(const video of candidates){const button=document.createElement('button');button.textContent=`${video.snippet.title} · ${video.snippet.channelTitle}`;button.onclick=()=>{const youtube=video.id?.videoId;if(!youtube)return;player.connect(track,{youtube});$('media-dialog').close();if(current?.id!==track.id)selectTrack(track,false);playCurrent('full');};$('video-candidates').append(button);}}catch{$('video-candidates').textContent=t('ui.mediaFailed');}}
+function openMedia(track=current){if(!track)return;mediaTarget=track;$('media-track-name').textContent=`${track.title} — ${track.artist}`;$('media-url').value='';if(!$('media-dialog').open)$('media-dialog').showModal();}
  $('play').onclick=()=>playCurrent('preview',{explicit:true});$('full-toggle').onclick=()=>playCurrent('full',{explicit:true});$('add-track').onclick=()=>playlist.add(current);$('share-track').onclick=()=>{if(current)shareText(`${current.title} — ${current.artist}`);};$('connect-media').onclick=()=>openMedia();
 $('refresh').onclick=()=>selectCountry(country);$('country-prev').onclick=()=>cycle(-1);$('country-next').onclick=()=>cycle(1);$('country-fav').onclick=toggleFavorite;function cycle(delta){const all=countries.filter(hasChart),saved=all.filter(c=>favorites.has(c.code)),pool=saved.length?saved:all,here=all.findIndex(c=>c.code===country.code),start=here<0?(delta>0?-1:0):here;for(let step=1;step<=all.length;step++){const next=all[((start+delta*step)%all.length+all.length)%all.length];if(!pool.includes(next))continue;if(next.code===country.code){if(saved.length)toast(t('ui.favNeedMore'));return;}selectCountry(next);return;}}
 function countryOptions(query=''){const host=$('country-options');host.replaceChildren();countries.filter(c=>`${c.name} ${countryLabel(c).name} ${c.en} ${c.code}`.toLowerCase().includes(query.toLowerCase())).forEach(c=>{const label=countryLabel(c),button=document.createElement('button');button.innerHTML=`${esc(label.name)}<small>${esc([label.sub,hasChart(c)?'':t('ui.noChartShort')].filter(Boolean).join(' · '))}</small>`;button.onclick=()=>{$('country-dialog').close();selectCountry(c);};host.append(button);});}
 $('country-open').onclick=()=>{countryOptions();$('country-search').value='';$('country-dialog').showModal();$('country-search').focus();};$('country-search').oninput=e=>countryOptions(e.target.value);
-$('settings-open').onclick=()=>$('settings-dialog').showModal();$('settings-form').onsubmit=e=>{e.preventDefault();const value=$('youtube-key').value.trim();if(!value){toast(t('settings.empty'));return;}setKey(value);$('youtube-key').value='';$('settings-dialog').close();toast(t('settings.saved'));};$('youtube-key-clear').onclick=()=>{setKey('');$('youtube-key').value='';toast(t('settings.cleared'));};
+$('settings-open').onclick=()=>$('settings-dialog').showModal();
 // PayPal opens in another tab and reports nothing back, so thank the user when they return, or on ?thanks=1 if the PayPal link redirects here.
 let supportPending=false;
 document.querySelectorAll('[data-support]').forEach(link=>link.addEventListener('click',()=>{supportPending=true;$('support-thanks').hidden=true;}));

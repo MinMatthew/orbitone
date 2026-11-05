@@ -1,5 +1,5 @@
 import { $, readStore, writeStore, escapeHTML } from './lib.js?v=5';
-import { t } from './i18n.js?v=9';
+import { t } from './i18n.js?v=11';
 
 let ytReady, spotifyReady;
 

@@ -41,7 +41,7 @@ export const demos = [
 ];
 function appleChart(data, country) {
  if (!Array.isArray(data.feed?.results) || !data.feed.results.length) throw new Error('Empty chart');
- return {source:data.source==='itunes'?'iTunes Top Songs (fallback source)':'Apple Music Top Charts',updated:data.feed.updated,tracks:data.feed.results.map((x,i) => ({id:x.id,title:x.name,artist:x.artistName,genre:x.genres?.find(g=>g.genreId!=='34')?.name||'Genre unavailable',artwork:x.artworkUrl100?.replace('100x100','600x600'),url:x.url,rank:i+1,country:country.code,countryName:country.en}))};
+ return {source:data.source==='itunes'?'iTunes Top Songs (fallback source)':'Apple Music Top Charts',updated:data.feed.updated,tracks:data.feed.results.map((x,i) => ({id:x.id,title:x.name,artist:x.artistName,genre:x.genres?.find(g=>g.genreId!=='34')?.name||'Genre unavailable',artwork:x.artworkUrl100?.replace('100x100','600x600'),url:x.url,youtube:/^[\w-]{11}$/.test(x.youtube)?x.youtube:undefined,rank:i+1,country:country.code,countryName:country.en}))};
 }
 function itunesChart(data,country) {
  if (!Array.isArray(data.feed?.entry) || !data.feed.entry.length) throw new Error('Empty chart');

@@ -26,6 +26,9 @@ const isAppleLink = value => {
   } catch { return false; }
 };
 
+// Exact YouTube ids come with the charts; a search is the fallback for songs that have none yet.
+export const youtubeSearchUrl = track => `https://www.youtube.com/results?search_query=${encodeURIComponent(`${track.artist} ${track.title} official audio`)}`;
+
 // Opens the song itself when it is known, otherwise a search for it.
 export function serviceLink(service, track, mapping = {}) {
   const query = encodeURIComponent(`${track.artist} ${track.title}`);
@@ -39,7 +42,7 @@ export function serviceLink(service, track, mapping = {}) {
       ? track.url
       : `https://music.apple.com/${/^[a-z]{2}$/i.test(track.country ?? '') ? track.country.toLowerCase() : 'us'}/search?term=${query}`;
   }
-  return '';
+  return youtubeSearchUrl(track);
 }
 
 // Returns false when the browser blocked the new window.

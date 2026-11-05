@@ -1,5 +1,5 @@
 import { $, getJSON } from './lib.js?v=5';
-import { countries, hasChart } from './data.js?v=4';
+import { countries, hasChart } from './data.js?v=5';
 
 export async function createGlobe(onSelect, initial = countries[0]) {
  const canvas = $('globe'), ctx = canvas.getContext('2d');

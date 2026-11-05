@@ -18,6 +18,23 @@ OUT = ROOT / "charts"
 URL = "https://rss.marketingtools.apple.com/api/v2/{cc}/music/most-played/25/songs.json"
 ITUNES_URL = "https://itunes.apple.com/{cc}/rss/topsongs/limit=25/json"
 KEEP = ("id", "name", "artistName", "artworkUrl100", "url")
+LINKS = ROOT / "data" / "youtube-links.json"
+
+
+def load_links():
+    """Exact YouTube ids collected by scripts/youtube_links.mjs (Apple track id -> {v: video id})."""
+    try:
+        return json.loads(LINKS.read_text(encoding="utf-8")).get("links", {})
+    except (OSError, ValueError):
+        return {}
+
+
+def attach_links(chart, links):
+    # Without this the hourly rewrite would drop the ids the daily job added.
+    for row in chart["feed"]["results"]:
+        video = (links.get(str(row.get("id"))) or {}).get("v")
+        if video:
+            row["youtube"] = video
 
 
 def country_codes():
@@ -102,6 +119,7 @@ def main():
     written = unchanged = 0
     failed = []
     statuses = {}
+    links = load_links()
     # Apple's endpoint answers 5xx when hit with many parallel requests, so keep the pool small.
     with ThreadPoolExecutor(max_workers=4) as pool:
         for cc, chart, missing in pool.map(load, codes):
@@ -112,6 +130,7 @@ def main():
                 statuses[cc] = "available" if path.exists() else ("unavailable" if missing else "unknown")
                 continue
             statuses[cc] = "available"
+            attach_links(chart, links)
             # `updated` changes on every request; only rewrite when the ranking itself changed.
             if path.exists():
                 old = json.loads(path.read_text(encoding="utf-8"))

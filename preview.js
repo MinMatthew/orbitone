@@ -1,6 +1,5 @@
 import { getJSON } from './lib.js?v=5';
-import { cacheGet, cacheSet, lookupKey } from './cache.js?v=21';
-import { normalize } from './youtube.js?v=22';
+import { cacheGet, cacheSet, lookupKey, normalize } from './cache.js?v=22';
 
 const ITUNES = 'https://itunes.apple.com';
 
