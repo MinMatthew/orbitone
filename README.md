@@ -48,6 +48,11 @@ all fall inside the same Pacific quota day and do nothing once that day's budget
 - **Fallback.** Songs without an exact link open a YouTube search (`youtubeSearchUrl` in `services.js`); if the browser
   blocks the new tab, the 30-second preview plays instead.
 
+`data/youtube-progress.json` is rewritten by every run (`{"day","percent","linked","total","done"}`, where `percent` is the
+share of chart rows with a video). While `done` is false the app shows it at the top of **What's New**, so listeners see
+the daily progress. `done` turns true once the depth is 25 and every song in the charts has been searched; after that
+the file stops changing.
+
 `data/youtube-links.json`:
 
 ```json

@@ -1,14 +1,14 @@
-import { $, icon, escapeHTML as esc, safeImage, toast, shareText, readStore, writeStore } from './lib.js?v=5';
+import { $, icon, escapeHTML as esc, safeImage, toast, shareText, readStore, writeStore, getJSON } from './lib.js?v=5';
 import { countries, loadChart, loadChartIndex, hasChart, systemCountry } from './data.js?v=5';
 import { createGlobe } from './globe.js?v=26';
 import { parseMediaURL } from './player.js?v=25';
 import { Playback } from './playback.js?v=29';
 import { Playlist } from './playlist.js?v=4';
 import { setupPWA } from './pwa.js?v=10';
-import { applyLocale, countryLabel, t, lang, SUPPORTED, LANG_NAMES, setLangPref } from './i18n.js?v=11';
+import { applyLocale, countryLabel, t, lang, SUPPORTED, LANG_NAMES, setLangPref } from './i18n.js?v=12';
 import { getService, setService } from './services.js?v=2';
 import { playChime } from './chime.js?v=1';
-import { renderUpdates } from './updates.js?v=5';
+import { renderUpdates } from './updates.js?v=6';
 
 // Earlier versions asked listeners for their own YouTube API key; links now come with the charts.
 try{localStorage.removeItem('orbitone-youtube-key');}catch{/* storage unavailable */}
@@ -71,7 +71,9 @@ document.addEventListener('visibilitychange',()=>{if(supportPending&&document.vi
 $('media-form').onsubmit=e=>{e.preventDefault();try{const link=parseMediaURL($('media-url').value);player.connect(mediaTarget,link);$('media-dialog').close();if(current?.id===mediaTarget.id)playCurrent('full');toast(t('ui.mediaSaved'));}catch(error){toast(error.message);}};
 $('play-sequence').onclick=()=>playlist.start();$('play-shuffle').onclick=()=>playlist.start(true);$('discover').onclick=()=>showTab('player');$('export-open').onclick=()=>$('export-dialog').showModal();$('share-playlist').onclick=()=>shareText(playlist.exportText());$('download-playlist').onclick=()=>playlist.download();for(const provider of ['youtube','spotify'])$(`copy-${provider}`).onclick=async()=>{const text=playlist.exportText(provider);try{await navigator.clipboard.writeText(text);toast(t('ui.linksCopied'));}catch{$('export-text').hidden=false;$('export-text').value=text;$('export-text').select();}};
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}}));
-$('chart-open').onclick=()=>{$('chart-dialog-heading').textContent=$('chart-heading').textContent;$('chart-dialog').showModal();};$('chart-prev').onclick=()=>cycle(-1);$('chart-next').onclick=()=>cycle(1);$('chart-list').addEventListener('click',e=>{if(e.target.closest('.chart-row'))$('chart-dialog').close();});applyLocale();renderUpdates($('update-list'),lang);setupPWA();selectCountry(country);loadChartIndex().then(()=>globe?.refresh());createGlobe(selectCountry,country).then(g=>{globe=g;g.select(country);}).catch(()=>{$('globe-loading').textContent=t('ui.globeFailed');});
+$('chart-open').onclick=()=>{$('chart-dialog-heading').textContent=$('chart-heading').textContent;$('chart-dialog').showModal();};$('chart-prev').onclick=()=>cycle(-1);$('chart-next').onclick=()=>cycle(1);$('chart-list').addEventListener('click',e=>{if(e.target.closest('.chart-row'))$('chart-dialog').close();});applyLocale();renderUpdates($('update-list'),lang);showProgressOnOpen();setupPWA();selectCountry(country);loadChartIndex().then(()=>globe?.refresh());createGlobe(selectCountry,country).then(g=>{globe=g;g.select(country);}).catch(()=>{$('globe-loading').textContent=t('ui.globeFailed');});
+// While YouTube links are still being collected, opening What's New also shows how far along they are.
+function showProgressOnOpen(){const panel=$('update-list').closest('details');let loaded=false;panel.addEventListener('toggle',async()=>{if(!panel.open||loaded)return;loaded=true;try{const p=await getJSON('./data/youtube-progress.json',6000);if(p.done||!Number.isFinite(p.percent))return;const percent=Math.min(100,Math.max(0,p.percent));renderUpdates($('update-list'),lang,{date:p.day,text:t('updates.progress',{percent:percent.toLocaleString(lang,{maximumFractionDigits:1})})});}catch{/* offline or not published yet: the notes stay as they are */}});}
 const INTRO_KEY='orbitone-intro-seen';
 const intro=$('globe-intro');
 function introSeen(){try{return localStorage.getItem(INTRO_KEY)==='1';}catch{return false;}}

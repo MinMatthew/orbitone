@@ -14,6 +14,7 @@ import path from 'node:path';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CHARTS = path.join(ROOT, 'charts');
 const STORE = path.join(ROOT, 'data', 'youtube-links.json');
+const PROGRESS = path.join(ROOT, 'data', 'youtube-progress.json');
 
 export const MAX_DEPTH = 25;
 export const SEARCH_COST = 100;
@@ -136,6 +137,21 @@ export function applyLinks(chart, links) {
     else if (!video && 'youtube' in row) { delete row.youtube; changed = true; }
   }
   return changed;
+}
+
+// ---- Progress (shown in the app's What's New until the first full pass is finished) ----
+
+export function progressOf(charts, links) {
+  const rows = Object.values(charts).flat();
+  const songs = new Set(rows.map(row => row.id));
+  return { rows: rows.length, linked: rows.filter(row => links[row.id]?.v).length, songs: songs.size, covered: [...songs].filter(id => links[id]).length };
+}
+
+// The bootstrap pass is over once the depth reached 25 and every song in today's charts has been searched.
+export const bootstrapDone = (stats, depth) => depth >= MAX_DEPTH && stats.covered === stats.songs;
+
+export function progressFile(stats, state, today) {
+  return { day: today, percent: stats.rows ? Math.round((1000 * stats.linked) / stats.rows) / 10 : 0, linked: stats.linked, total: stats.rows, done: Boolean(state.completed) };
 }
 
 // ---- Storage ----
@@ -285,21 +301,34 @@ export async function run({ key = process.env.YOUTUBE_API_KEY, dryRun = false, f
     }
   }
 
-  const written = await save(store, links, dryRun);
-  const total = new Set(Object.values(charts).flat().map(row => row.id));
-  const covered = [...total].filter(id => links[id]).length;
+  const stats = progressOf(charts, links);
+  const depth = Math.min(MAX_DEPTH, Math.max(0, daysBetween(state.started, today)) + 1);
+  if (!dryRun && !state.completed && bootstrapDone(stats, depth)) state.completed = today;
+  const written = await save(store, links, dryRun, progressFile(stats, state, today));
+  const total = { size: stats.songs };
+  const covered = stats.covered;
   log(`searched=${found + missing} found=${found} none=${missing} verified=${verified} dropped=${dropped} pruned=${pruned} units=${state.usage.units}/${budget} covered=${covered}/${total.size} chartsUpdated=${written}${stopped ? ` (${stopped})` : ''}`);
   return { found, missing, verified, dropped, pruned, covered, total: total.size, written, stopped };
 }
 
-async function save(store, links, dryRun) {
+async function save(store, links, dryRun, progress) {
   if (dryRun) return 0;
   await mkdir(path.dirname(STORE), { recursive: true });
   const text = serialize(store);
   let old = '';
   try { old = await readFile(STORE, 'utf8'); } catch { /* first run */ }
   if (text !== old) await writeFile(STORE, text);
+  if (progress) await saveProgress(progress);
   return writeCharts(links);
+}
+
+async function saveProgress(progress) {
+  let old = '';
+  try { old = await readFile(PROGRESS, 'utf8'); } catch { /* first run */ }
+  // Once finished the file stops changing, so maintenance runs do not commit every day.
+  if (progress.done && old.includes('"done":true')) return;
+  const text = `${JSON.stringify(progress)}\n`;
+  if (text !== old) await writeFile(PROGRESS, text);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

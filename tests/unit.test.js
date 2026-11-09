@@ -4,7 +4,7 @@ import { normalize } from '../cache.js';
 import { youtubeSearchUrl, serviceLink } from '../services.js';
 import {
   scoreVideo, rankVideos, searchBest, findBroken, QuotaError, planQueue, dueForVerify, refreshSeen, applyLinks, serialize,
-  pacificDay, daysBetween,
+  pacificDay, daysBetween, progressOf, bootstrapDone, progressFile,
 } from '../scripts/youtube_links.mjs';
 
 const track = { title: 'Love Dive', artist: 'IVE', country: 'kr' };
@@ -153,4 +153,21 @@ test('youtubeSearchUrl searches for the artist and title', () => {
   assert.equal(url.hostname, 'www.youtube.com');
   assert.equal(url.searchParams.get('search_query'), 'IVE Love Dive official audio');
   assert.equal(serviceLink('youtube', { artist: 'IVE', title: 'Love Dive' }), url.href);
+});
+
+test('progressOf counts chart rows with a video and songs already searched', () => {
+  const charts = { kr: [row('1'), row('2')], us: [row('1'), row('3')] };
+  const links = { 1: { v: 'aaaaaaaaaaa' }, 2: { v: null } };
+  assert.deepEqual(progressOf(charts, links), { rows: 4, linked: 2, songs: 3, covered: 2 });
+});
+
+test('bootstrap is done only at full depth with every song searched', () => {
+  assert.equal(bootstrapDone({ songs: 3, covered: 3 }, 25), true);
+  assert.equal(bootstrapDone({ songs: 3, covered: 3 }, 24), false);
+  assert.equal(bootstrapDone({ songs: 3, covered: 2 }, 25), false);
+});
+
+test('progressFile reports the percentage of chart rows with a video', () => {
+  assert.deepEqual(progressFile({ rows: 4275, linked: 1356, songs: 2175, covered: 400 }, {}, '2026-11-09'), { day: '2026-11-09', percent: 31.7, linked: 1356, total: 4275, done: false });
+  assert.equal(progressFile({ rows: 0, linked: 0, songs: 0, covered: 0 }, { completed: '2026-11-29' }, '2026-11-29').done, true);
 });

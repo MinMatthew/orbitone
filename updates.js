@@ -46,8 +46,26 @@ function formatDate(date, lang) {
 // The list shows only the latest releases.
 const MAX_ENTRIES = 3;
 
-export function renderUpdates(host, lang) {
-  host.replaceChildren(...UPDATES.slice(0, MAX_ENTRIES).map(entry => {
+// A live entry for work still in progress: { date: 'YYYY-MM-DD', text }.
+function progressSection({ date, text }, lang) {
+  const section = document.createElement('section');
+  section.className = 'update-entry update-progress';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    const time = document.createElement('time');
+    time.dateTime = date;
+    time.textContent = formatDate(date, lang);
+    section.append(time);
+  }
+  const list = document.createElement('ul');
+  const item = document.createElement('li');
+  item.textContent = text;
+  list.append(item);
+  section.append(list);
+  return section;
+}
+
+export function renderUpdates(host, lang, progress = null) {
+  const sections = UPDATES.slice(0, MAX_ENTRIES).map(entry => {
     const section = document.createElement('section');
     section.className = 'update-entry';
     const time = document.createElement('time');
@@ -61,5 +79,7 @@ export function renderUpdates(host, lang) {
     }
     section.append(time, list);
     return section;
-  }));
+  });
+  if (progress) sections.unshift(progressSection(progress, lang));
+  host.replaceChildren(...sections);
 }
