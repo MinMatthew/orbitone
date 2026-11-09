@@ -1,6 +1,18 @@
 // Newest first. Each entry lists what got better for users, per language; `en` is the fallback.
 export const UPDATES = [
   {
+    date: '2026-11-09',
+    notes: {
+      en: ['Fixed the globe looking broken on some Android devices.', 'While a video is playing, you can now return to the globe with the "Close video" button.'],
+      ko: ['일부 안드로이드 기기에서 지구본이 깨져 보이던 문제를 고쳤어요.', '영상을 재생하는 중에도 "영상 닫기" 버튼으로 지구본 화면으로 돌아올 수 있어요.'],
+      ja: ['一部のAndroid端末で地球儀が崩れて表示される問題を修正しました。', '動画の再生中でも「動画を閉じる」ボタンで地球儀の画面に戻れます。'],
+      zh: ['修复了部分安卓设备上地球仪显示异常的问题。', '播放视频时，也可以用“关闭视频”按钮回到地球仪界面。'],
+      es: ['Hemos corregido el globo que se veía roto en algunos dispositivos Android.', 'Mientras se reproduce un vídeo, ahora puedes volver al globo con el botón «Cerrar vídeo».'],
+      fr: ['Nous avons corrigé l’affichage du globe, qui apparaissait cassé sur certains appareils Android.', 'Pendant la lecture d’une vidéo, vous pouvez revenir au globe avec le bouton « Fermer la vidéo ».'],
+      de: ['Auf manchen Android-Geräten wurde der Globus fehlerhaft dargestellt – das ist behoben.', 'Während ein Video läuft, kommst du jetzt mit der Schaltfläche „Video schließen“ zurück zum Globus.']
+    }
+  },
+  {
     date: '2026-11-05',
     notes: {
       en: ['You can now choose the app language in Options.', 'Full-track listening on YouTube now works without an API key. Popular songs already have their videos linked, and more are added every day.', 'Songs without a video yet open a YouTube search, with a note that the link is being prepared.'],

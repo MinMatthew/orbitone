@@ -1,4 +1,4 @@
-import { UI } from './ui-strings.js?v=6';
+import { UI } from './ui-strings.js?v=7';
 
 const escapeHTML = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 

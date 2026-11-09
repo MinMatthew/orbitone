@@ -1,14 +1,14 @@
 import { $, icon, escapeHTML as esc, safeImage, toast, shareText, readStore, writeStore, getJSON } from './lib.js?v=5';
 import { countries, loadChart, loadChartIndex, hasChart, systemCountry } from './data.js?v=5';
-import { createGlobe } from './globe.js?v=26';
+import { createGlobe } from './globe.js?v=27';
 import { parseMediaURL } from './player.js?v=25';
 import { Playback } from './playback.js?v=29';
 import { Playlist } from './playlist.js?v=4';
 import { setupPWA } from './pwa.js?v=10';
-import { applyLocale, countryLabel, t, lang, SUPPORTED, LANG_NAMES, setLangPref } from './i18n.js?v=12';
+import { applyLocale, countryLabel, t, lang, SUPPORTED, LANG_NAMES, setLangPref } from './i18n.js?v=13';
 import { getService, setService } from './services.js?v=2';
 import { playChime } from './chime.js?v=1';
-import { renderUpdates } from './updates.js?v=6';
+import { renderUpdates } from './updates.js?v=7';
 
 // Earlier versions asked listeners for their own YouTube API key; links now come with the charts.
 try{localStorage.removeItem('orbitone-youtube-key');}catch{/* storage unavailable */}
@@ -51,14 +51,14 @@ function updateAddButton(){const added=current&&playlist.items.some(t=>t.id===cu
 function selectTrack(track,clearQueue=true){playback.stop(t('ui.tapToStart'));current=track;if(clearQueue)playlist.clearQueue();$('track-title').textContent=track.title;$('track-artist').textContent=track.artist;$('track-genre').textContent=track.genre||t('ui.genreUnavailable');$('track-country').textContent=localCountry(track);$('artwork').src=safeImage(track.artwork);$('artwork').alt=t('ui.albumCover',{title:track.title});$('rank-badge').textContent=track.rank?`TOP ${String(track.rank).padStart(2,'0')}`:t('ui.example');$('playback-status').textContent=t('ui.tapToStart');updateAddButton();}
 $('artwork').onerror=()=>{$('artwork').onerror=null;$('artwork').src='./assets/icon-512.png';};
 function renderChart(){const host=$('chart-list');host.replaceChildren();tracks.forEach((track,index)=>{const row=document.createElement('button');row.className='chart-row';row.innerHTML=`<span>${chart.demo?'—':String(index+1).padStart(2,'0')}</span><img src="${esc(safeImage(track.artwork))}" alt="" loading="lazy"><span class="row-meta"><strong>${esc(track.title)}</strong><small>${esc(track.artist)}</small></span>${icon('play')}`;row.onclick=()=>{selectTrack(track);playCurrent('preview',{explicit:true});};row.querySelector('img').onerror=e=>{e.target.onerror=null;e.target.src='./assets/icon-192.png';};host.append(row);});}
-async function selectCountry(next){const token=++chartToken;country=next;globe?.select(next);renderFavorite();playback.stop(t('ui.tapToStart'));playlist.clearQueue();current=null;tracks=[];$('chart-list').replaceChildren();$('chart-list').scrollTop=0;$('country-code').textContent=next.code?.toUpperCase()||'—';const label=countryLabel(next);$('country-name').textContent=label.name;$('country-en').textContent=label.sub;$('chart-heading').textContent=t('ui.topCharts',{country:label.name});$('chart-dialog-heading').textContent=$('chart-heading').textContent;$('chart-status').classList.remove('warning');$('chart-status').textContent=t('ui.connecting');$('track-title').textContent=t('ui.discovering');$('track-artist').textContent=label.name;$('track-country').textContent=label.name;$('track-genre').textContent='—';$('rank-badge').textContent=t('ui.chartBadge');$('artwork').src='./assets/icon-512.png';$('play').disabled=true;$('add-track').disabled=true;
+async function selectCountry(next){closeIntro();const token=++chartToken;country=next;globe?.select(next);renderFavorite();playback.stop(t('ui.tapToStart'));playlist.clearQueue();current=null;tracks=[];$('chart-list').replaceChildren();$('chart-list').scrollTop=0;$('country-code').textContent=next.code?.toUpperCase()||'—';const label=countryLabel(next);$('country-name').textContent=label.name;$('country-en').textContent=label.sub;$('chart-heading').textContent=t('ui.topCharts',{country:label.name});$('chart-dialog-heading').textContent=$('chart-heading').textContent;$('chart-status').classList.remove('warning');$('chart-status').textContent=t('ui.connecting');$('track-title').textContent=t('ui.discovering');$('track-artist').textContent=label.name;$('track-country').textContent=label.name;$('track-genre').textContent='—';$('rank-badge').textContent=t('ui.chartBadge');$('artwork').src='./assets/icon-512.png';$('play').disabled=true;$('add-track').disabled=true;
  if(!hasChart(next)){$('track-title').textContent=t('ui.noChartTitle');$('chart-status').textContent=t('ui.noChartBody');$('chart-status').classList.add('warning');return;}
  chart=await loadChart(next);if(token!==chartToken)return;tracks=chart.tracks;const date=chart.updated?new Date(chart.updated):null;$('chart-status').textContent=`${chart.stale?t('ui.chartOffline'):''}${sourceLabel(chart.source)}${date&&!Number.isNaN(+date)?` · ${t('ui.updated',{date:date.toLocaleString(lang,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})})}`:''}`;$('chart-status').classList.toggle('warning',!!(chart.demo||chart.stale));$('play').disabled=!navigator.onLine;$('full-toggle').disabled=!navigator.onLine;$('add-track').disabled=false;selectTrack(tracks[0]);renderChart();
 }
 function playCurrent(mode='preview',{explicit=false}={}){if(!current||!navigator.onLine)return;const same=playback.track?.id===current.id&&playback.mode===mode;if(same&&playback.state==='loading')return;if(same&&explicit&&['playing','paused'].includes(playback.state)){playback.toggle();return;}playback.play(current,mode);}
 function moveTrack(delta){if(playlist.queue.length){if(!playlist.next(delta))toast(t('ui.endOfPlaylist'));return;}if(!tracks.length)return;const wasActive=['playing','paused','loading'].includes(playback.state),prevMode=playback.mode,i=tracks.findIndex(t=>t.id===current?.id);selectTrack(tracks[(i+delta+tracks.length)%tracks.length]);if(wasActive)playCurrent(prevMode||'preview');}
 function openMedia(track=current){if(!track)return;mediaTarget=track;$('media-track-name').textContent=`${track.title} — ${track.artist}`;$('media-url').value='';if(!$('media-dialog').open)$('media-dialog').showModal();}
- $('play').onclick=()=>playCurrent('preview',{explicit:true});$('full-toggle').onclick=()=>playCurrent('full',{explicit:true});$('add-track').onclick=()=>playlist.add(current);$('share-track').onclick=()=>{if(current)shareText(`${current.title} — ${current.artist}`);};$('connect-media').onclick=()=>openMedia();
+ $('play').onclick=()=>playCurrent('preview',{explicit:true});$('full-toggle').onclick=()=>playCurrent('full',{explicit:true});$('add-track').onclick=()=>playlist.add(current);$('share-track').onclick=()=>{if(current)shareText(`${current.title} — ${current.artist}`);};$('connect-media').onclick=()=>openMedia();$('close-video').onclick=restoreDefaultView;
 $('refresh').onclick=()=>selectCountry(country);$('country-prev').onclick=()=>cycle(-1);$('country-next').onclick=()=>cycle(1);$('country-fav').onclick=toggleFavorite;function cycle(delta){const all=countries.filter(hasChart),saved=all.filter(c=>favorites.has(c.code)),pool=saved.length?saved:all,here=all.findIndex(c=>c.code===country.code),start=here<0?(delta>0?-1:0):here;for(let step=1;step<=all.length;step++){const next=all[((start+delta*step)%all.length+all.length)%all.length];if(!pool.includes(next))continue;if(next.code===country.code){if(saved.length)toast(t('ui.favNeedMore'));return;}selectCountry(next);return;}}
 function countryOptions(query=''){const host=$('country-options');host.replaceChildren();countries.filter(c=>`${c.name} ${countryLabel(c).name} ${c.en} ${c.code}`.toLowerCase().includes(query.toLowerCase())).forEach(c=>{const label=countryLabel(c),button=document.createElement('button');button.innerHTML=`${esc(label.name)}<small>${esc([label.sub,hasChart(c)?'':t('ui.noChartShort')].filter(Boolean).join(' · '))}</small>`;button.onclick=()=>{$('country-dialog').close();selectCountry(c);};host.append(button);});}
 $('country-open').onclick=()=>{countryOptions();$('country-search').value='';$('country-dialog').showModal();$('country-search').focus();};$('country-search').oninput=e=>countryOptions(e.target.value);
@@ -76,11 +76,15 @@ $('chart-open').onclick=()=>{$('chart-dialog-heading').textContent=$('chart-head
 function showProgressOnOpen(){const panel=$('update-list').closest('details');let loaded=false;panel.addEventListener('toggle',async()=>{if(!panel.open||loaded)return;loaded=true;try{const p=await getJSON('./data/youtube-progress.json',6000);if(p.done||!Number.isFinite(p.percent))return;const percent=Math.min(100,Math.max(0,p.percent));renderUpdates($('update-list'),lang,{date:p.day,text:t('updates.progress',{percent:percent.toLocaleString(lang,{maximumFractionDigits:1})})});}catch{/* offline or not published yet: the notes stay as they are */}});}
 const INTRO_KEY='orbitone-intro-seen';
 const intro=$('globe-intro');
-function introSeen(){try{return localStorage.getItem(INTRO_KEY)==='1';}catch{return false;}}
-function closeIntro(){if(intro.hidden)return;intro.hidden=true;try{localStorage.setItem(INTRO_KEY,'1');}catch{/* seen flag is best effort */}}
+const introStores=[()=>localStorage,()=>sessionStorage];
+function introSeen(){for(const store of introStores){try{if(store().getItem(INTRO_KEY)==='1')return true;}catch{/* storage blocked */}}return false;}
+function markIntroSeen(){for(const store of introStores){try{store().setItem(INTRO_KEY,'1');}catch{/* storage blocked */}}}
+// Looked up on demand: selectCountry() can run before `intro` below is initialised.
+function closeIntro(){const dialog=$('globe-intro');if(dialog.hidden)return;dialog.hidden=true;markIntroSeen();}
 intro.addEventListener('click',closeIntro);
 document.addEventListener('keydown',event=>{if(event.key==='Escape')closeIntro();});
-function showIntro(){if(introSeen())return;intro.hidden=false;intro.focus({preventScroll:true});}
+// Marked as seen when it first shows, so a reload or a skipped tap never brings it back.
+function showIntro(){if(introSeen())return;intro.hidden=false;markIntroSeen();intro.focus({preventScroll:true});}
 let splashTimer=0;
 function hideSplash(){clearTimeout(splashTimer);const splash=$('splash');if(!splash||splash.classList.contains('hide'))return;let finished=false;const done=()=>{if(finished)return;finished=true;splash.remove();showIntro();};splash.classList.add('hide');if(matchMedia('(prefers-reduced-motion: reduce)').matches)done();else{splash.addEventListener('transitionend',done,{once:true});setTimeout(done,700);}}
 // Count from first paint (or the first frame if none yet) so slow cold starts still show the whole fade sequence.

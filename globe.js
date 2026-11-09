@@ -14,15 +14,18 @@ export async function createGlobe(onSelect, initial = countries[0]) {
  const markers = countries.filter(c=>!drawn.has(c.id));
  const projection = d3.geoOrthographic().rotate([-initial.center[0],-initial.center[1]]).clipAngle(90).precision(.5);
  const path = d3.geoPath(projection,ctx), grid=d3.geoGraticule10();
- let width=0,height=0,radius=0,centerY=0,selected=initial,drag=null,animation=0,zoom=1,pinchDistance=0,pinching=false,zoomAnimation=0,lastTap=null,zoomFallback=0;
+ let width=0,height=0,ratio=1,radius=0,centerY=0,selected=initial,drag=null,animation=0,zoom=1,pinchDistance=0,pinching=false,zoomAnimation=0,lastTap=null,zoomFallback=0;
  const touchPoints=new Map();
  const minZoom=.65,maxZoom=2.2;
  const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
  function draw() {
+  // Reapplied on every frame: some Android browsers drop the 2D context state, which left the globe at half size.
+  ctx.setTransform(ratio,0,0,ratio,0,0);
   ctx.clearRect(0,0,width,height);
   // Deterministic stars keep the canvas still when idle (no perpetual animation loop).
     for(let i=0;i<45;i++){ctx.fillStyle=`rgba(111,91,130,${.12+(i%4)*.08})`;ctx.beginPath();ctx.arc((i*97+31)%width,(i*67+17)%height,i%3===0?1:.5,0,Math.PI*2);ctx.fill();}
-    ctx.save();ctx.shadowColor='#b47ad2';ctx.shadowBlur=23;ctx.beginPath();path({type:'Sphere'});ctx.fillStyle='#f6eff9';ctx.fill();ctx.restore();
+    const globeRadius=radius*zoom,halo=ctx.createRadialGradient(width/2,centerY,globeRadius*.96,width/2,centerY,globeRadius+26);halo.addColorStop(0,'#b47ad2b8');halo.addColorStop(.35,'#b47ad258');halo.addColorStop(1,'#b47ad200');ctx.beginPath();ctx.arc(width/2,centerY,globeRadius+26,0,Math.PI*2);ctx.fillStyle=halo;ctx.fill();
+    ctx.beginPath();path({type:'Sphere'});ctx.fillStyle='#f6eff9';ctx.fill();
     const ocean=ctx.createRadialGradient(width/2-radius*.4,centerY-radius*.5,10,width/2,centerY,radius);
     ocean.addColorStop(0,'#fff5df');ocean.addColorStop(.58,'#d9eefa');ocean.addColorStop(1,'#aacce4');
   ctx.beginPath();path({type:'Sphere'});ctx.fillStyle=ocean;ctx.fill();
@@ -40,7 +43,7 @@ export async function createGlobe(onSelect, initial = countries[0]) {
  // Two quick taps in roughly the same spot reset the zoom (also covers mouse double-click and iOS, which skips dblclick).
  function registerTap(e){const now=performance.now();if(lastTap&&now-lastTap.time<320&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<32){lastTap=null;animateZoom(1);}else lastTap={time:now,x:e.clientX,y:e.clientY};}
  function touchGap(){const points=[...touchPoints.values()];return Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);}
- function resize(){const box=canvas.getBoundingClientRect();if(!box.width||!box.height)return;width=box.width;height=box.height;centerY=height*.47;const ratio=Math.min(devicePixelRatio||1,2);canvas.width=width*ratio;canvas.height=height*ratio;ctx.setTransform(ratio,0,0,ratio,0,0);radius=Math.min(width*.46,height*.44);projection.translate([width/2,centerY]).scale(radius*zoom);draw();}
+ function resize(){const box=canvas.getBoundingClientRect();if(!box.width||!box.height)return;width=box.width;height=box.height;centerY=height*.47;ratio=Math.min(devicePixelRatio||1,2);const pixelWidth=Math.round(width*ratio),pixelHeight=Math.round(height*ratio);if(canvas.width!==pixelWidth)canvas.width=pixelWidth;if(canvas.height!==pixelHeight)canvas.height=pixelHeight;radius=Math.min(width*.46,height*.44);projection.translate([width/2,centerY]).scale(radius*zoom);draw();}
  function countryAtCenter(){const center=projection.invert([width/2,centerY]);const containing=features.find(f=>d3.geoContains(f,center));if(containing){const id=featureId(containing),mapped=byId.get(id);if(mapped)return mapped;return {code:null,id,name:containing.properties.name,en:containing.properties.name,center:d3.geoCentroid(containing)};}return countries.reduce((best,c)=>d3.geoDistance(center,c.center)<d3.geoDistance(center,best.center)?c:best,countries[0]);}
  function snap(country){selected=country;cancelAnimationFrame(animation);const start=projection.rotate(),target=[-country.center[0],-country.center[1],0];let delta=((target[0]-start[0]+540)%360)-180;const begin=performance.now();function frame(now){const t=motion?Math.min((now-begin)/650,1):1;const ease=1-Math.pow(1-t,4);projection.rotate([start[0]+delta*ease,start[1]+(target[1]-start[1])*ease,0]);draw();if(t<1)animation=requestAnimationFrame(frame);}animation=requestAnimationFrame(frame);}
  canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'){if(touchPoints.size>=2)return;cancelAnimationFrame(animation);canvas.setPointerCapture(e.pointerId);touchPoints.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touchPoints.size===1)drag={id:e.pointerId,x:e.clientX,y:e.clientY,rotation:projection.rotate()};else{drag=null;pinching=true;pinchDistance=touchGap();}return;}if(!e.isPrimary)return;cancelAnimationFrame(animation);canvas.setPointerCapture(e.pointerId);drag={id:e.pointerId,x:e.clientX,y:e.clientY,rotation:projection.rotate()};});
@@ -49,6 +52,9 @@ export async function createGlobe(onSelect, initial = countries[0]) {
  function finish(e){let moved=false;if(e.pointerType==='touch'&&touchPoints.has(e.pointerId)){const wasPinching=pinching;touchPoints.delete(e.pointerId);if(touchPoints.size===1){const [id,point]=touchPoints.entries().next().value;drag={id,x:point.x,y:point.y,rotation:projection.rotate()};pinchDistance=0;return;}moved=!!drag?.moved;drag=null;pinchDistance=0;pinching=false;if(wasPinching)return;}else{if(!drag||drag.id!==e.pointerId)return;moved=!!drag.moved;drag=null;}const country=countryAtCenter();snap(country);if(moved||e.type==='pointercancel')onSelect(country);else registerTap(e);}
  canvas.addEventListener('pointerup',finish);canvas.addEventListener('pointercancel',finish);
  canvas.addEventListener('keydown',e=>{const r=projection.rotate();if(e.key==='ArrowLeft')r[0]-=12;else if(e.key==='ArrowRight')r[0]+=12;else if(e.key==='ArrowUp')r[1]=Math.min(80,r[1]+10);else if(e.key==='ArrowDown')r[1]=Math.max(-80,r[1]-10);else if(e.key==='Enter'){const c=countryAtCenter();snap(c);onSelect(c);e.preventDefault();return;}else return;e.preventDefault();cancelAnimationFrame(animation);projection.rotate(r);selected=countryAtCenter();draw();});
+ // The page can come back from the background (or the GPU surface can be dropped) with a stale canvas.
+ canvas.addEventListener('contextlost',e=>e.preventDefault());canvas.addEventListener('contextrestored',resize);
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')resize();});window.addEventListener('pageshow',resize);
  new ResizeObserver(resize).observe(canvas);resize();$('globe-loading').hidden=true;
  return {select:snap,refresh:draw};
 }

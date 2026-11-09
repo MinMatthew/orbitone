@@ -1,5 +1,5 @@
 import { safeImage } from './lib.js?v=5';
-import { t } from './i18n.js?v=12';
+import { t } from './i18n.js?v=13';
 import { Player } from './player.js?v=25';
 import { Preview, findPreview } from './preview.js?v=22';
 import { SERVICES, serviceLink, openLink } from './services.js?v=2';
