@@ -29,9 +29,9 @@ removed from `localStorage` on start.
 
 ### YouTube links (daily)
 
-`.github/workflows/youtube-links.yml` runs `scripts/youtube_links.mjs` (Node 20+, no dependencies) three times a day
-(09:30, 15:30 and 21:30 UTC). GitHub often delays or drops scheduled runs, so the extra attempts are a safety net: they
-all fall inside the same Pacific quota day and do nothing once that day's budget is spent.
+`.github/workflows/youtube-links.yml` runs `scripts/youtube_links.mjs` (Node 20+, no dependencies) seven times a day
+(08:17, 11:47, 15:17, 18:47, 22:17, 01:47 and 05:17 UTC). GitHub often delays or drops scheduled runs, so the extra
+attempts are a safety net: the first run after the quota resets does the day's work and the rest do nothing.
 
 - **Shared by song.** Links are keyed by Apple track id, so a song that charts in many countries is searched once and
   rank changes reuse the stored link.

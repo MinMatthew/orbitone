@@ -2,11 +2,16 @@ name: Update YouTube links
 
 on:
   schedule:
-    # GitHub often delays or drops scheduled runs. Three attempts a day, all inside the same Pacific quota day:
-    # once the day's budget is spent the later runs do nothing.
-    - cron: "30 9 * * *"
-    - cron: "30 15 * * *"
-    - cron: "30 21 * * *"
+    # GitHub often delays or drops scheduled runs, by hours at times. Seven attempts a day at off-peak minutes, the
+    # first just after the quota resets at midnight Pacific time (08:00 UTC in winter). Once the day's budget is spent
+    # the later runs do nothing.
+    - cron: "17 8 * * *"
+    - cron: "47 11 * * *"
+    - cron: "17 15 * * *"
+    - cron: "47 18 * * *"
+    - cron: "17 22 * * *"
+    - cron: "47 1 * * *"
+    - cron: "17 5 * * *"
   workflow_dispatch:
 
 permissions:
