@@ -1,6 +1,18 @@
 // Newest first. Each entry lists what got better for users, per language; `en` is the fallback.
 export const UPDATES = [
   {
+    date: '2026-11-12',
+    notes: {
+      en: ['Flick the globe and it spins like a roulette wheel, stops on a random country, and plays that country\'s #1 song preview right away.', 'You can now favorite a country straight from the country list with the star next to its name.'],
+      ko: ['지구본을 휙 돌리면 룰렛처럼 돌다가 무작위 나라에서 멈추고, 그 나라 1위 곡의 미리듣기가 바로 재생돼요.', '나라 목록에서도 각 나라 옆의 별표로 바로 즐겨찾기할 수 있어요.'],
+      ja: ['地球儀をさっと回すとルーレットのように回転し、ランダムな国で止まって、その国の1位の曲のプレビューがすぐに再生されます。', '国の一覧でも、各国の横の星ですぐにお気に入りに登録できます。'],
+      zh: ['轻轻一甩地球仪，它会像轮盘一样旋转，随机停在某个国家，并立即播放该国第一名歌曲的试听。', '现在在国家列表中，也可以直接点按每个国家旁边的星标来收藏。'],
+      es: ['Lanza el globo y girará como una ruleta, se detendrá en un país al azar y reproducirá enseguida el adelanto de la canción n.º 1 de ese país.', 'Ahora también puedes marcar un país como favorito directamente desde la lista de países con la estrella junto a su nombre.'],
+      fr: ['Lancez le globe : il tourne comme une roulette, s’arrête sur un pays au hasard et lance aussitôt l’extrait du titre n° 1 de ce pays.', 'Vous pouvez désormais mettre un pays en favori directement depuis la liste des pays, avec l’étoile à côté de son nom.'],
+      de: ['Wirf den Globus an: Er dreht sich wie ein Roulette, bleibt bei einem zufälligen Land stehen und spielt sofort die Hörprobe des Nr.-1-Songs dieses Landes ab.', 'Du kannst ein Land jetzt direkt in der Länderliste mit dem Stern neben seinem Namen zu den Favoriten hinzufügen.']
+    }
+  },
+  {
     date: '2026-11-09',
     notes: {
       en: ['Fixed the globe looking broken on some Android devices.', 'While a video is playing, you can now return to the globe with the "Close video" button.'],

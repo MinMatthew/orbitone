@@ -302,3 +302,43 @@ button:hover {
     box-shadow: 0 40px 110px rgba(105, 73, 112, .16);
   }
 }
+.country-item {
+  position: relative;
+  display: flex;
+}
+
+#country-options .country-item-main {
+  flex: 1;
+  min-width: 0;
+  padding-right: 40px;
+}
+
+#country-options .country-item-fav {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #9a8fa3;
+  transform: translateY(-50%);
+}
+
+#country-options .country-item-fav svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+#country-options .country-item-fav[aria-pressed="true"] {
+  color: #f2a93b;
+}

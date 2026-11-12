@@ -65,7 +65,7 @@ export class Playback {
     this.hooks.onEnded(ended);
   }
 
-  async play(track, mode = 'preview') {
+  async play(track, mode = 'preview', { allowFull = true } = {}) {
     this.halt();
     if (mode === 'full' && this.hooks.service() !== 'youtube') {
       this.openExternal(track);
@@ -81,7 +81,7 @@ export class Playback {
       return;
     }
     if (mode === 'full') await this.startFull(track, token);
-    else await this.startPreview(track, token, { allowFull: true });
+    else await this.startPreview(track, token, { allowFull });
   }
 
   // Must run synchronously inside the tap so the browser lets the other app open.
