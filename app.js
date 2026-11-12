@@ -1,6 +1,6 @@
 import { $, icon, escapeHTML as esc, safeImage, toast, shareText, readStore, writeStore, getJSON } from './lib.js?v=5';
 import { countries, loadChart, loadChartIndex, hasChart, systemCountry } from './data.js?v=5';
-import { createGlobe } from './globe.js?v=28';
+import { createGlobe } from './globe.js?v=29';
 import { parseMediaURL } from './player.js?v=25';
 import { Playback } from './playback.js?v=30';
 import { Playlist } from './playlist.js?v=4';
