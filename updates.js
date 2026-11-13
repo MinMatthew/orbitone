@@ -1,6 +1,18 @@
 // Newest first. Each entry lists what got better for users, per language; `en` is the fallback.
 export const UPDATES = [
   {
+    date: '2026-11-13',
+    notes: {
+      en: ['Tap "Share the app with a friend" in Options to copy the app link and show a big QR code your friend can scan right away.'],
+      ko: ['옵션에서 "친구에게 앱 공유하기"를 누르면 앱 주소가 복사되고, 친구가 바로 스캔할 수 있는 QR 코드가 크게 나와요.'],
+      ja: ['オプションの「友だちにアプリを共有」をタップすると、アプリのリンクがコピーされ、友だちがすぐに読み取れる大きなQRコードが表示されます。'],
+      zh: ['在选项中点按“与朋友分享应用”，即可复制应用链接，并显示大大的二维码，朋友可以立即扫描。'],
+      es: ['Pulsa «Compartir la app con un amigo» en Opciones para copiar el enlace de la app y mostrar un código QR grande que tu amigo puede escanear al instante.'],
+      fr: ['Touchez « Partager l’app avec un ami » dans les Options pour copier le lien de l’app et afficher un grand code QR que votre ami peut scanner aussitôt.'],
+      de: ['Tippe in den Optionen auf „App mit einem Freund teilen“, um den App-Link zu kopieren und einen großen QR-Code anzuzeigen, den dein Freund sofort scannen kann.']
+    }
+  },
+  {
     date: '2026-11-12',
     notes: {
       en: ['Flick the globe and it spins like a roulette wheel, stops on a random country, and plays that country\'s #1 song preview right away.', 'You can now favorite a country straight from the country list with the star next to its name.'],
