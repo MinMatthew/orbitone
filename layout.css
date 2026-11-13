@@ -1238,7 +1238,11 @@ footer p,
   text-transform: uppercase;
 }
 
-.share-app {
+.pill-button.share-app {
+  color: #fff;
+  background: var(--gradient);
+  border: 0;
+  box-shadow: 0 8px 20px -6px rgba(165, 100, 174, .5);
   font-size: 14px;
   font-weight: 700;
 }
@@ -1330,4 +1334,20 @@ footer p,
   14% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-3deg); }
   80% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-3deg); animation-timing-function: ease-in; }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(.85) rotate(-3deg); }
+}
+
+.toast.update-notice {
+  bottom: calc(75px + env(safe-area-inset-bottom));
+  z-index: 21;
+}
+
+.update-notice.visible {
+  pointer-events: auto;
+}
+
+.update-notice button {
+  margin-left: 8px;
+  color: #ffd6f1;
+  font-weight: 700;
+  text-decoration: underline;
 }
