@@ -1351,3 +1351,9 @@ footer p,
   font-weight: 700;
   text-decoration: underline;
 }
+
+#settings-dialog a.share-app {
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+}
